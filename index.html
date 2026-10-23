@@ -3,133 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Selim Island Nation - Official Portal</title>
+  <title>Selim Island Nation - Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Descope Web Component & SDK CDN Links -->
   <script src="https://descopecdn.com/npm/@descope/web-component@3.59.2/dist/index.js"></script>
   <script src="https://descopecdn.com/npm/@descope/web-js-sdk@1.50.3/dist/index.umd.js"></script>
-
   <style>
-    .passport-card {
-      background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
-      border: 2px solid #f59e0b;
-    }
+    .passport-card { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border: 2px solid #f59e0b; }
+    descope-wc { width: 100%; min-height: 380px; display: block; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-  <!-- Configuration Variables -->
   <script>
     const DESCOPE_PROJECT_ID = "P3IWd9Q6bmMoHLwBAnKqN57We0nk";
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqwek057AkqjAk_TpxIfvELN1SpwOUj9wN4ifB92bwSelQw5uahsF1cmaqgVuFSmvu/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyje0ft0iBPhCIqFO8Nql83xL61g9FDfGhq2dv--Br_geEB5AK8kppJ9T_28agh3s4/exec";
   </script>
 
-  <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('landing')">
-        <span class="text-3xl">🏝️</span>
-        <h1 class="text-xl font-bold tracking-wider text-amber-400">SELIM ISLAND NATION</h1>
-      </div>
-      <div id="authHeaderState">
-        <button id="btnNavLogin" onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-lg font-semibold transition">
-          Sign In / Register
-        </button>
-      </div>
+  <header class="border-b border-slate-800 bg-slate-900 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('landing')">
+      <span class="text-3xl">🏝️</span>
+      <h1 class="text-xl font-bold tracking-wider text-amber-400">SELIM ISLAND NATION</h1>
+    </div>
+    <div id="authHeaderState">
+      <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg font-semibold transition">
+        Sign In / Apply
+      </button>
     </div>
   </header>
 
-  <!-- Main Body Content -->
   <main class="flex-grow max-w-4xl mx-auto px-4 py-10 w-full">
 
-    <!-- Landing View -->
-    <section id="secLanding" class="space-y-8 text-center">
-      <div class="py-12 space-y-4">
-        <h2 class="text-5xl font-extrabold text-amber-400">Welcome to Freedom & Sovereignty</h2>
-        <p class="text-lg text-slate-300 max-w-2xl mx-auto">
-          Selim Island Nation is a peaceful, forward-thinking micronation. Apply for digital citizenship today and receive your official digital passport upon verification.
-        </p>
-        <div class="pt-4 flex justify-center gap-4">
-          <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-3 rounded-lg text-lg font-bold">
-            Become a Citizen
-          </button>
-        </div>
+    <!-- Landing Page -->
+    <section id="secLanding" class="text-center space-y-6 py-12">
+      <h2 class="text-5xl font-extrabold text-amber-400">Sovereign Territory & Gateway</h2>
+      <p class="text-slate-300 max-w-2xl mx-auto text-lg">
+        Apply for full citizenship or request short-term visitor passes to access Selim Island Nation digital sovereign services.
+      </p>
+      <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-8 py-3 rounded-lg text-lg font-bold">
+        Enter Portal
+      </button>
+    </section>
+
+    <!-- Descope Auth View (Fixed Container Box) -->
+    <section id="secAuth" class="hidden max-w-md mx-auto bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-2xl">
+      <h3 class="text-xl font-bold text-center text-amber-400 mb-4">Citizen & Visitor Login</h3>
+      <div id="descopeContainer" class="w-full">
+        <!-- Injected Web Component -->
       </div>
     </section>
 
-    <!-- Descope Auth View -->
-    <section id="secAuth" class="hidden max-w-md mx-auto bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
-      <h3 class="text-xl font-bold text-center text-amber-400 mb-6">Citizen Access Portal</h3>
-      <div id="descopeContainer" class="flex justify-center bg-white p-4 rounded-lg">
-        <descope-wc id="descopeAuthWc" flow-id="sign-up-or-in" theme="light"></descope-wc>
+    <!-- Application Selection / Request Form -->
+    <section id="secApply" class="hidden max-w-2xl mx-auto bg-slate-900 p-8 rounded-xl border border-slate-800 shadow-xl space-y-6">
+      <div class="flex border-b border-slate-800 gap-4 pb-2">
+        <button id="tabBtnCit" onclick="switchFormTab('citizenship')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2">Citizenship Application</button>
+        <button id="tabBtnPass" onclick="switchFormTab('pass')" class="font-bold text-slate-400 pb-2">Temporary Visitor Pass</button>
       </div>
-      <div id="descopeError" class="hidden text-rose-400 text-sm mt-4 text-center"></div>
-    </section>
 
-    <!-- Citizenship Application Form -->
-    <section id="secApply" class="hidden max-w-lg mx-auto bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-xl">
-      <h3 class="text-2xl font-bold text-amber-400 mb-2">Citizenship Application</h3>
-      <p class="text-sm text-slate-400 mb-6">Complete your personal profile to request citizenship.</p>
-      
-      <form id="citizenshipForm" class="space-y-4" onsubmit="submitApplication(event)">
+      <!-- Citizenship Application -->
+      <form id="citizenshipForm" class="space-y-4" onsubmit="submitCitizenship(event)">
         <div>
-          <label class="block text-sm font-medium mb-1">Full Name</label>
-          <input type="text" id="appFullName" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:border-amber-400 focus:outline-none">
+          <label class="block text-sm font-medium mb-1">Full Legal Name</label>
+          <input type="text" id="citFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Email Address</label>
-          <input type="email" id="appEmail" required readonly class="w-full bg-slate-900/50 border border-slate-800 rounded p-2 text-slate-400 cursor-not-allowed">
+          <label class="block text-sm font-medium mb-1">Email</label>
+          <input type="email" id="citEmail" readonly class="w-full bg-slate-800 border border-slate-700 rounded p-2.5 text-slate-400">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Phone Number</label>
-          <input type="tel" id="appPhone" required placeholder="+1234567890" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:border-amber-400 focus:outline-none">
+          <input type="tel" id="citPhone" required placeholder="+1234567890" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
         </div>
-        <button type="submit" id="btnSubmitApp" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded transition">
-          Submit Application
-        </button>
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Apply for Citizenship</button>
       </form>
-      <div id="appStatusMessage" class="mt-4 text-center font-semibold"></div>
+
+      <!-- Temporary Pass Application -->
+      <form id="passForm" class="space-y-4 hidden" onsubmit="submitPass(event)">
+        <div>
+          <label class="block text-sm font-medium mb-1">Full Name</label>
+          <input type="text" id="passFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Phone Number</label>
+          <input type="tel" id="passPhone" required placeholder="+1234567890" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Pass Duration</label>
+          <select id="passDuration" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+            <optgroup label="Minute Options (5-min increments)">
+              <option value="5">5 Minutes</option>
+              <option value="10">10 Minutes</option>
+              <option value="15">15 Minutes</option>
+              <option value="20">20 Minutes</option>
+              <option value="25">25 Minutes</option>
+              <option value="30">30 Minutes</option>
+            </optgroup>
+            <optgroup label="Extended Passes">
+              <option value="1440">1 Day Pass</option>
+              <option value="2880">2 Days Pass</option>
+              <option value="4320">3 Days Pass</option>
+              <option value="5760">4 Days Pass</option>
+              <option value="10080">1 Week Pass</option>
+            </optgroup>
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Request Temporary Pass</button>
+      </form>
+      <div id="formMsg" class="text-center font-semibold"></div>
     </section>
 
-    <!-- User Dashboard / Digital Passport View -->
+    <!-- User Dashboard View -->
     <section id="secDashboard" class="hidden space-y-6">
-      <div id="passportStatusBanner" class="p-4 rounded-lg bg-slate-800 border border-slate-700 text-center"></div>
+      <div id="dashboardOverview" class="p-4 bg-slate-900 border border-slate-800 rounded-lg text-center"></div>
 
-      <!-- Passport Card Component -->
-      <div id="passportCard" class="passport-card max-w-md mx-auto rounded-2xl p-6 shadow-2xl relative overflow-hidden hidden">
-        <div class="flex justify-between items-start border-b border-amber-500/30 pb-4 mb-4">
+      <!-- Digital Citizenship Passport -->
+      <div id="passportCard" class="passport-card max-w-md mx-auto rounded-2xl p-6 shadow-2xl hidden">
+        <div class="flex justify-between border-b border-amber-500/30 pb-3 mb-4">
           <div>
-            <p class="text-xs text-amber-400 uppercase tracking-widest font-semibold">Official Passport</p>
-            <h4 class="text-lg font-bold text-white">SELIM ISLAND NATION</h4>
+            <p class="text-xs text-amber-400 uppercase font-semibold">Official Citizen Passport</p>
+            <h4 class="text-lg font-bold">SELIM ISLAND NATION</h4>
           </div>
           <span class="text-3xl">🏝️</span>
         </div>
-        
-        <div class="space-y-3 text-sm">
-          <div>
-            <p class="text-xs text-slate-400">Passport No.</p>
-            <p id="passNumber" class="font-mono font-bold text-amber-300 text-lg">---</p>
-          </div>
-          <div>
-            <p class="text-xs text-slate-400">Full Name</p>
-            <p id="passName" class="font-semibold text-white uppercase">---</p>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <p class="text-xs text-slate-400">Status</p>
-              <p id="passStatus" class="font-bold text-emerald-400">---</p>
-            </div>
-            <div>
-              <p class="text-xs text-slate-400">Issued Date</p>
-              <p id="passIssued" class="text-slate-200">---</p>
-            </div>
-          </div>
+        <div class="space-y-2 text-sm">
+          <p class="text-xs text-slate-400">Passport No: <span id="pNum" class="font-mono text-amber-300 text-base font-bold"></span></p>
+          <p class="text-xs text-slate-400">Name: <span id="pName" class="text-white font-semibold"></span></p>
+          <p class="text-xs text-slate-400">Status: <span id="pStatus" class="text-emerald-400 font-bold"></span></p>
+          <p class="text-xs text-slate-400">Approved Date: <span id="pDate" class="text-slate-200"></span></p>
         </div>
+      </div>
 
-        <div class="mt-6 pt-3 border-t border-amber-500/30 flex justify-between items-center text-xs text-slate-400">
-          <span>Sovereign Digital Identity</span>
-          <span class="font-mono">SIN-VERIFIED</span>
+      <!-- Temporary Pass Card -->
+      <div id="passCard" class="bg-slate-900 border border-amber-500/50 max-w-md mx-auto rounded-2xl p-6 shadow-2xl hidden">
+        <div class="flex justify-between border-b border-slate-800 pb-3 mb-4">
+          <div>
+            <p class="text-xs text-amber-400 uppercase font-semibold">Temporary Visitor Pass</p>
+            <h4 class="text-lg font-bold" id="passTypeHeader"></h4>
+          </div>
+          <span class="text-3xl">🎟️</span>
+        </div>
+        <div class="space-y-2 text-sm">
+          <p class="text-xs text-slate-400">Pass ID: <span id="passIdVal" class="font-mono text-amber-300 font-bold"></span></p>
+          <p class="text-xs text-slate-400">Status: <span id="passStatusVal" class="font-bold"></span></p>
+          <p class="text-xs text-slate-400">Approval Time: <span id="passApprovedVal"></span></p>
+          <p class="text-xs text-slate-400">Expiration Time: <span id="passExpiresVal" class="text-amber-400 font-bold"></span></p>
         </div>
       </div>
     </section>
@@ -140,174 +156,125 @@
     let currentUser = null;
     let descopeSdk = null;
 
-    // View Manager
-    function showSection(section) {
-      ['secLanding', 'secAuth', 'secApply', 'secDashboard'].forEach(id => {
-        document.getElementById(id).classList.add('hidden');
-      });
-      if (section === 'landing') document.getElementById('secLanding').classList.remove('hidden');
-      if (section === 'auth') document.getElementById('secAuth').classList.remove('hidden');
-      if (section === 'apply') document.getElementById('secApply').classList.remove('hidden');
-      if (section === 'dashboard') document.getElementById('secDashboard').classList.remove('hidden');
+    function showSection(sec) {
+      ['secLanding', 'secAuth', 'secApply', 'secDashboard'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById(sec === 'landing' ? 'secLanding' : sec === 'auth' ? 'secAuth' : sec === 'apply' ? 'secApply' : 'secDashboard').classList.remove('hidden');
+      if (sec === 'auth') renderDescopeWc();
     }
 
-    // Initialize Descope Authentication
-    function initDescope() {
-      // Set project ID dynamically on web component
-      const descopeWc = document.getElementById('descopeAuthWc');
-      descopeWc.setAttribute('project-id', DESCOPE_PROJECT_ID);
-
-      // Initialize Descope SDK
-      if (typeof Descope !== 'undefined') {
-        descopeSdk = Descope({ projectId: DESCOPE_PROJECT_ID });
-        checkExistingSession();
-      }
-
-      // Descope Web Component Event Listeners
-      descopeWc.addEventListener('success', (e) => {
-        const user = e.detail.user;
-        currentUser = {
-          userId: user.userId,
-          email: user.email,
-          name: user.name || ""
-        };
-        handlePostLogin();
-      });
-
-      descopeWc.addEventListener('error', (e) => {
-        const errDiv = document.getElementById('descopeError');
-        errDiv.classList.remove('hidden');
-        errDiv.innerText = "Authentication failed. Please try again.";
-      });
-    }
-
-    // Check for an active session JWT token
-    async function checkExistingSession() {
-      if (!descopeSdk) return;
-      const sessionToken = descopeSdk.getSessionToken();
-      if (sessionToken && !descopeSdk.isJwtExpired(sessionToken)) {
-        const user = descopeSdk.getUser();
-        if (user) {
-          currentUser = {
-            userId: user.userId,
-            email: user.email,
-            name: user.name || ""
-          };
-          handlePostLogin();
-        }
+    function switchFormTab(tab) {
+      if (tab === 'citizenship') {
+        document.getElementById('citizenshipForm').classList.remove('hidden');
+        document.getElementById('passForm').classList.add('hidden');
+        document.getElementById('tabBtnCit').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2';
+        document.getElementById('tabBtnPass').className = 'font-bold text-slate-400 pb-2';
+      } else {
+        document.getElementById('citizenshipForm').classList.add('hidden');
+        document.getElementById('passForm').classList.remove('hidden');
+        document.getElementById('tabBtnPass').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2';
+        document.getElementById('tabBtnCit').className = 'font-bold text-slate-400 pb-2';
       }
     }
 
-    // Handle flow after successful authentication
-    async function handlePostLogin() {
-      document.getElementById('authHeaderState').innerHTML = `
-        <button onclick="logout()" class="border border-slate-700 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-sm transition">
-          Sign Out
-        </button>
-      `;
-
-      // Fetch citizenship record from Apps Script backend
-      try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: "getUserPassport", descopeUserId: currentUser.userId })
-        });
-        
-        const result = await response.json();
-
-        if (result.success) {
-          showSection('dashboard');
-          renderPassport(result.data);
-        } else {
-          showSection('apply');
-          document.getElementById('appEmail').value = currentUser.email;
-          if (currentUser.name) document.getElementById('appFullName').value = currentUser.name;
-        }
-      } catch (err) {
-        console.error("Backend request failed", err);
-      }
-    }
-
-    // Submit Citizenship Application
-    async function submitApplication(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btnSubmitApp');
-      const statusMsg = document.getElementById('appStatusMessage');
+    function renderDescopeWc() {
+      const container = document.getElementById('descopeContainer');
+      container.innerHTML = `<descope-wc project-id="${DESCOPE_PROJECT_ID}" flow-id="sign-up-or-in" theme="dark"></descope-wc>`;
       
-      btn.disabled = true;
-      btn.innerText = "Submitting...";
+      const wc = container.querySelector('descope-wc');
+      wc.addEventListener('success', (e) => {
+        currentUser = { userId: e.detail.user.userId, email: e.detail.user.email, name: e.detail.user.name || "" };
+        fetchUserStatus();
+      });
+    }
 
-      const payload = {
-        action: "requestCitizenship",
-        descopeUserId: currentUser.userId,
-        fullName: document.getElementById('appFullName').value,
-        email: currentUser.email,
-        phone: document.getElementById('appPhone').value
-      };
+    async function fetchUserStatus() {
+      document.getElementById('authHeaderState').innerHTML = `<button onclick="logout()" class="border border-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm">Sign Out</button>`;
 
-      try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload)
-        });
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "getUserStatus", descopeUserId: currentUser.userId })
+      });
+      const result = await res.json();
 
-        const result = await response.json();
-        btn.disabled = false;
-        btn.innerText = "Submit Application";
+      if (result.success) {
+        showSection('dashboard');
+        const { citizenRecord, passes } = result.data;
+        const banner = document.getElementById('dashboardOverview');
+        
+        let hasActiveCit = citizenRecord && citizenRecord.status === "Approved";
+        let activePass = passes.find(p => p.status === "Approved");
 
-        if (result.success) {
-          statusMsg.className = "mt-4 text-center font-semibold text-emerald-400";
-          statusMsg.innerText = "Application submitted! Reviewing details...";
-          setTimeout(() => handlePostLogin(), 1500);
+        if (hasActiveCit) {
+          banner.innerHTML = `<span class="text-emerald-400 font-bold">✓ Active Official Citizenship</span>`;
+          document.getElementById('passportCard').classList.remove('hidden');
+          document.getElementById('pNum').innerText = citizenRecord.passportNumber;
+          document.getElementById('pName').innerText = citizenRecord.fullName;
+          document.getElementById('pStatus').innerText = citizenRecord.status;
+          document.getElementById('pDate').innerText = citizenRecord.issuedDate;
+        } else if (activePass) {
+          banner.innerHTML = `<span class="text-amber-400 font-bold">🎟️ Active Temporary Visitor Pass</span>`;
+          document.getElementById('passCard').classList.remove('hidden');
+          document.getElementById('passTypeHeader').innerText = activePass.passType;
+          document.getElementById('passIdVal').innerText = activePass.passId;
+          document.getElementById('passStatusVal').innerText = activePass.status;
+          document.getElementById('passApprovedVal').innerText = activePass.approvedAt;
+          document.getElementById('passExpiresVal').innerText = activePass.expiresAt;
         } else {
-          statusMsg.className = "mt-4 text-center font-semibold text-rose-400";
-          statusMsg.innerText = result.message;
+          banner.innerHTML = `No active passport or pass found. <button onclick="showSection('apply')" class="text-amber-400 underline ml-2">Apply Now</button>`;
+          document.getElementById('citEmail').value = currentUser.email;
+          document.getElementById('citFullName').value = currentUser.name;
+          document.getElementById('passFullName').value = currentUser.name;
         }
-      } catch (err) {
-        btn.disabled = false;
-        btn.innerText = "Submit Application";
-        statusMsg.className = "mt-4 text-center font-semibold text-rose-400";
-        statusMsg.innerText = "Failed to submit application. Please check backend configuration.";
       }
     }
 
-    // Render Digital Passport
-    function renderPassport(data) {
-      const banner = document.getElementById('passportStatusBanner');
-      const card = document.getElementById('passportCard');
-
-      if (data.status === 'Approved') {
-        banner.innerHTML = `<span class="text-emerald-400 font-bold">✓ Citizenship Approved</span> - Official Digital Passport Granted.`;
-        card.classList.remove('hidden');
-        document.getElementById('passNumber').innerText = data.passportNumber;
-        document.getElementById('passName').innerText = data.fullName;
-        document.getElementById('passStatus').innerText = data.status;
-        document.getElementById('passIssued').innerText = data.issuedDate;
-      } else if (data.status === 'Pending') {
-        banner.innerHTML = `<span class="text-amber-400 font-bold">⏳ Application Pending Review</span><br><span class="text-xs text-slate-400">Passport Number Reserved: ${data.passportNumber}</span>`;
-        card.classList.add('hidden');
-      } else {
-        banner.innerHTML = `<span class="text-rose-400 font-bold">✕ Citizenship Revoked / Rejected</span>`;
-        card.classList.add('hidden');
-      }
+    async function submitCitizenship(e) {
+      e.preventDefault();
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: "requestCitizenship",
+          descopeUserId: currentUser.userId,
+          fullName: document.getElementById('citFullName').value,
+          email: currentUser.email,
+          phone: document.getElementById('citPhone').value
+        })
+      });
+      const result = await res.json();
+      document.getElementById('formMsg').innerText = result.message;
+      if (result.success) setTimeout(fetchUserStatus, 1500);
     }
 
-    function logout() {
-      if (descopeSdk) {
-        descopeSdk.logout().then(() => {
-          currentUser = null;
-          window.location.reload();
-        });
-      } else {
-        currentUser = null;
-        window.location.reload();
-      }
+    async function submitPass(e) {
+      e.preventDefault();
+      const durationSelect = document.getElementById('passDuration');
+      const passText = durationSelect.options[durationSelect.selectedIndex].text;
+      
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: "requestPass",
+          descopeUserId: currentUser.userId,
+          fullName: document.getElementById('passFullName').value,
+          email: currentUser.email,
+          phone: document.getElementById('passPhone').value,
+          passType: passText,
+          durationMinutes: durationSelect.value
+        })
+      });
+      const result = await res.json();
+      document.getElementById('formMsg').innerText = result.message;
+      if (result.success) setTimeout(fetchUserStatus, 1500);
     }
 
-    // On page load, initialize Descope
-    window.addEventListener('DOMContentLoaded', initDescope);
+    function logout() { window.location.reload(); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof Descope !== 'undefined') descopeSdk = Descope({ projectId: DESCOPE_PROJECT_ID });
+    });
   </script>
 </body>
 </html>
