@@ -9,7 +9,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyje0ft0iBPhCIqFO8Nql83xL61g9FDfGhq2dv--Br_geEB5AK8kppJ9T_28agh3s4/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeQ7_FFik0DbUcpJYQVxrER4KvQv5v-oNYuoXZ8QJueMzWGMs-UvVjXzpc0GnezUqA/exec";
   </script>
 
   <header class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center">
@@ -37,7 +37,8 @@
       
       <!-- Category Tabs -->
       <div class="flex flex-wrap border-b border-slate-800 gap-2 pb-2 text-xs font-semibold">
-        <button onclick="switchTab('current_citizen')" id="tab_current_citizen" class="px-3 py-2 rounded bg-amber-500 text-slate-950">Current Citizens</button>
+        <button onclick="switchTab('registered_users')" id="tab_registered_users" class="px-3 py-2 rounded bg-amber-500 text-slate-950">Registered Users</button>
+        <button onclick="switchTab('current_citizen')" id="tab_current_citizen" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Current Citizens</button>
         <button onclick="switchTab('current_pass')" id="tab_current_pass" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Current Pass Holders</button>
         <button onclick="switchTab('pending_citizen')" id="tab_pending_citizen" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Pending Citizens</button>
         <button onclick="switchTab('pending_pass')" id="tab_pending_pass" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Pending Pass Holders</button>
@@ -60,8 +61,8 @@
 
   <script>
     let adminPwd = "";
-    let rawData = { citizens: [], passes: [] };
-    let currentTab = "current_citizen";
+    let rawData = { users: [], citizens: [], passes: [] };
+    let currentTab = "registered_users";
 
     async function authenticateAdmin(e) {
       e.preventDefault();
@@ -99,7 +100,7 @@
 
     function switchTab(tabKey) {
       currentTab = tabKey;
-      ['current_citizen','current_pass','pending_citizen','pending_pass','expired_pass','paused_citizen'].forEach(k => {
+      ['registered_users','current_citizen','current_pass','pending_citizen','pending_pass','expired_pass','paused_citizen'].forEach(k => {
         document.getElementById('tab_' + k).className = k === tabKey ? "px-3 py-2 rounded bg-amber-500 text-slate-950 font-bold" : "px-3 py-2 rounded bg-slate-800 text-slate-300 font-semibold";
       });
       renderCurrentTab();
@@ -110,7 +111,20 @@
       const tbody = document.getElementById('adminTableBody');
       tbody.innerHTML = "";
 
-      if (currentTab.includes("citizen")) {
+      if (currentTab === "registered_users") {
+        headers.innerHTML = `<th class="p-4">User ID</th><th class="p-4">Full Name</th><th class="p-4">Email</th><th class="p-4">Phone</th><th class="p-4">Created Date</th>`;
+        rawData.users.forEach(u => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="p-4 font-mono font-bold text-amber-300">${u.userId}</td>
+            <td class="p-4 font-medium text-white">${u.fullName}</td>
+            <td class="p-4 text-xs">${u.email}</td>
+            <td class="p-4 text-xs text-slate-400">${u.phone || 'N/A'}</td>
+            <td class="p-4 text-xs text-slate-400">${u.createdAt}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else if (currentTab.includes("citizen")) {
         headers.innerHTML = `<th class="p-4">Passport No</th><th class="p-4">Applicant</th><th class="p-4">Email / Phone</th><th class="p-4">Status</th><th class="p-4">Approval Date</th><th class="p-4">Actions</th>`;
         
         let filtered = rawData.citizens.filter(c => {
@@ -135,7 +149,6 @@
           `;
           tbody.appendChild(tr);
         });
-
       } else {
         headers.innerHTML = `<th class="p-4">Pass ID</th><th class="p-4">Applicant</th><th class="p-4">Type</th><th class="p-4">Status</th><th class="p-4">Approval Date & Time</th><th class="p-4">Expiration Time</th><th class="p-4">Actions</th>`;
         
