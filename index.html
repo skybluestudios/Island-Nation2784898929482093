@@ -5,120 +5,132 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Selim Island Nation - Official Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
+    .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
     .passport-card { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border: 2px solid #f59e0b; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBG5L210aazB1GwIGJylYP9qB1PkC90g8PULavdk2W0p9Os-4moolYamcKBKVYQ9QF/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKpNvIhvQq6kZs3xTUNh06b43VJ0tXu26ib5goDH5ZDKOyiDwYXFWpwOHkoUDKUTSa/exec";
   </script>
 
   <!-- Header -->
-  <header class="border-b border-slate-800 bg-slate-900 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+  <header class="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur sticky top-0 z-50 px-4 md:px-8 py-4 flex justify-between items-center shadow-lg">
     <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('landing')">
-      <span class="text-3xl">🏝️</span>
-      <h1 class="text-xl font-bold tracking-wider text-amber-400">SELIM ISLAND NATION</h1>
+      <span class="text-2xl md:text-3xl">🏝️</span>
+      <div>
+        <h1 class="text-base md:text-xl font-extrabold tracking-widest text-amber-400">SELIM ISLAND NATION</h1>
+        <p class="text-[9px] md:text-[10px] tracking-wider text-slate-400 uppercase font-mono">Sovereign Portal</p>
+      </div>
     </div>
     <div id="authHeaderState">
-      <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg font-semibold transition">
+      <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition shadow-lg shadow-amber-500/10">
         Sign In / Register
       </button>
     </div>
   </header>
 
-  <main class="flex-grow max-w-4xl mx-auto px-4 py-10 w-full">
+  <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full flex flex-col justify-center">
+
+    <!-- Banned View -->
+    <section id="secBanned" class="hidden text-center space-y-6 py-12 glass-card p-6 md:p-10 rounded-2xl border-rose-900/50 shadow-2xl">
+      <div class="text-5xl md:text-6xl mb-2">🚫</div>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-rose-500">Access Restricted</h2>
+      <p class="text-slate-300 max-w-lg mx-auto text-sm md:text-base">
+        Your account or token has been marked as <span class="text-rose-400 font-bold">Banned</span> by the Sovereign Admin.
+      </p>
+    </section>
 
     <!-- Landing View -->
-    <section id="secLanding" class="text-center space-y-6 py-12">
-      <h2 class="text-5xl font-extrabold text-amber-400">Sovereign Territory & Gateway</h2>
-      <p class="text-slate-300 max-w-2xl mx-auto text-lg">
-        Apply for full citizenship or request short-term visitor passes to access Selim Island Nation sovereign digital services.
+    <section id="secLanding" class="text-center space-y-6 py-8 md:py-12">
+      <div class="inline-block px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold tracking-wider uppercase mb-2">
+        Official Micronation Gateway
+      </div>
+      <h2 class="text-4xl md:text-5xl font-black text-amber-400 tracking-tight">Sovereign Territory Access</h2>
+      <p class="text-slate-300 max-w-2xl mx-auto text-sm md:text-lg leading-relaxed">
+        Apply for verified citizenship or temporary visitor passes through our centralized sovereign identity network.
       </p>
-      <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-8 py-3 rounded-lg text-lg font-bold">
-        Enter Portal
+      <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-8 py-3.5 rounded-xl text-base md:text-lg font-bold transition shadow-xl shadow-amber-500/20">
+        Enter Citizen Portal
       </button>
     </section>
 
-    <!-- Registration / Login View -->
-    <section id="secAuth" class="hidden max-w-md mx-auto bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl">
+    <!-- Auth View -->
+    <section id="secAuth" class="hidden max-w-md mx-auto w-full glass-card p-6 md:p-8 rounded-2xl shadow-2xl">
       <div class="flex border-b border-slate-800 gap-4 mb-6">
-        <button id="authTabLogin" onclick="switchAuthTab('login')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center">Sign In</button>
-        <button id="authTabRegister" onclick="switchAuthTab('register')" class="font-bold text-slate-400 pb-2 w-1/2 text-center">Create Account</button>
+        <button id="authTabLogin" onclick="switchAuthTab('login')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center text-sm">Sign In</button>
+        <button id="authTabRegister" onclick="switchAuthTab('register')" class="font-bold text-slate-400 pb-2 w-1/2 text-center text-sm">Create Account</button>
       </div>
 
       <!-- Login Form -->
       <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
         <div>
-          <label class="block text-sm font-medium mb-1">Email Address</label>
-          <input type="email" id="loginEmail" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
+          <input type="email" id="loginEmail" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm focus:border-amber-400 focus:outline-none">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Password</label>
-          <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Password</label>
+          <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm focus:border-amber-400 focus:outline-none">
         </div>
-        <button type="submit" id="btnLoginSubmit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded transition">
-          Sign In
-        </button>
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition text-sm">Sign In</button>
       </form>
 
-      <!-- Registration Form -->
+      <!-- Register Form -->
       <form id="registerForm" class="space-y-4 hidden" onsubmit="handleRegister(event)">
         <div>
-          <label class="block text-sm font-medium mb-1">Full Name</label>
-          <input type="text" id="regFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Full Legal Name</label>
+          <input type="text" id="regFullName" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm focus:border-amber-400 focus:outline-none">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Email Address</label>
-          <input type="email" id="regEmail" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
+          <input type="email" id="regEmail" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm focus:border-amber-400 focus:outline-none">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Password</label>
-          <input type="password" id="regPassword" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Password</label>
+          <input type="password" id="regPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm focus:border-amber-400 focus:outline-none">
         </div>
-        <button type="submit" id="btnRegSubmit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded transition">
-          Register Account
-        </button>
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition text-sm">Register Account</button>
       </form>
 
-      <div id="authMsg" class="mt-4 text-center font-semibold text-sm"></div>
+      <div id="authMsg" class="mt-4 text-center font-semibold text-xs md:text-sm"></div>
     </section>
 
-    <!-- Application Form View -->
-    <section id="secApply" class="hidden max-w-2xl mx-auto bg-slate-900 p-8 rounded-xl border border-slate-800 shadow-xl space-y-6">
-      <div id="applyLockNotice" class="hidden p-3 bg-rose-950 border border-rose-800 text-rose-300 rounded text-center text-sm font-semibold">
-        🔒 New applications and pass requests have been locked for your account by an Admin.
+    <!-- Application Forms -->
+    <section id="secApply" class="hidden max-w-2xl mx-auto w-full glass-card p-6 md:p-8 rounded-2xl shadow-xl space-y-6">
+      <div id="applyLockNotice" class="hidden p-4 bg-rose-950/60 border border-rose-800/80 text-rose-300 rounded-xl text-center text-xs md:text-sm font-semibold">
+        🔒 New requests are currently locked for your account by an Admin.
       </div>
 
       <div id="applyFormWrap" class="space-y-6">
         <div class="flex border-b border-slate-800 gap-4 pb-2">
-          <button id="tabBtnCit" onclick="switchFormTab('citizenship')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2">Citizenship Application</button>
-          <button id="tabBtnPass" onclick="switchFormTab('pass')" class="font-bold text-slate-400 pb-2">Temporary Visitor Pass</button>
+          <button id="tabBtnCit" onclick="switchFormTab('citizenship')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2 text-xs md:text-sm">Citizenship Application</button>
+          <button id="tabBtnPass" onclick="switchFormTab('pass')" class="font-bold text-slate-400 pb-2 text-xs md:text-sm">Temporary Visitor Pass</button>
         </div>
 
-        <!-- Citizenship Form -->
         <form id="citizenshipForm" class="space-y-4" onsubmit="submitCitizenship(event)">
           <div>
-            <label class="block text-sm font-medium mb-1">Full Legal Name</label>
-            <input type="text" id="citFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Full Legal Name</label>
+            <input type="text" id="citFullName" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Email Address</label>
-            <input type="email" id="citEmail" readonly class="w-full bg-slate-800 border border-slate-700 rounded p-2.5 text-slate-400">
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Email Address</label>
+            <input type="email" id="citEmail" readonly class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-slate-400 text-sm">
           </div>
-          <button type="submit" id="btnSubmitCit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Apply for Citizenship</button>
+          <button type="submit" id="btnSubmitCit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition text-sm">Apply for Citizenship</button>
         </form>
 
-        <!-- Temporary Pass Form -->
         <form id="passForm" class="space-y-4 hidden" onsubmit="submitPass(event)">
           <div>
-            <label class="block text-sm font-medium mb-1">Full Name</label>
-            <input type="text" id="passFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Full Name</label>
+            <input type="text" id="passFullName" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Pass Duration</label>
-            <select id="passDuration" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Pass Duration</label>
+            <select id="passDuration" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm">
               <optgroup label="Minute Options (5-min increments)">
                 <option value="5">5 Minutes</option>
                 <option value="10">10 Minutes</option>
@@ -136,59 +148,92 @@
               </optgroup>
             </select>
           </div>
-          <button type="submit" id="btnSubmitPass" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Request Temporary Pass</button>
+          <button type="submit" id="btnSubmitPass" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition text-sm">Request Temporary Pass</button>
         </form>
-        <div id="formMsg" class="text-center font-semibold text-sm"></div>
+        <div id="formMsg" class="text-center font-semibold text-xs md:text-sm"></div>
       </div>
     </section>
 
-    <!-- User Dashboard View -->
+    <!-- Dashboard View -->
     <section id="secDashboard" class="hidden space-y-6">
-      <div id="dashboardOverview" class="p-4 bg-slate-900 border border-slate-800 rounded-lg text-center"></div>
+      <div id="dashboardOverview" class="p-6 glass-card rounded-2xl text-center"></div>
 
-      <!-- Digital Citizenship Passport Card -->
-      <div id="passportCard" class="passport-card max-w-md mx-auto rounded-2xl p-6 shadow-2xl hidden">
+      <!-- Passport Card -->
+      <div id="passportCard" class="passport-card max-w-md mx-auto rounded-2xl p-6 shadow-2xl hidden relative overflow-hidden">
         <div class="flex justify-between border-b border-amber-500/30 pb-3 mb-4">
           <div>
-            <p class="text-xs text-amber-400 uppercase font-semibold">Official Citizen Passport</p>
-            <h4 class="text-lg font-bold">SELIM ISLAND NATION</h4>
+            <p class="text-[10px] text-amber-400 uppercase tracking-widest font-bold">Official Citizen Passport</p>
+            <h4 class="text-base md:text-lg font-bold tracking-wider">SELIM ISLAND NATION</h4>
           </div>
           <span class="text-3xl">🏝️</span>
         </div>
-        <div class="space-y-2 text-sm">
-          <p class="text-xs text-slate-400">Passport No: <span id="pNum" class="font-mono text-amber-300 text-base font-bold"></span></p>
-          <p class="text-xs text-slate-400">Name: <span id="pName" class="text-white font-semibold"></span></p>
-          <p class="text-xs text-slate-400">Status: <span id="pStatus" class="font-bold"></span></p>
-          <p class="text-xs text-slate-400">Approved Date: <span id="pDate" class="text-slate-200"></span></p>
+        <div class="space-y-2 text-xs md:text-sm">
+          <p class="text-slate-400">Passport No: <span id="pNum" class="font-mono text-amber-300 text-sm md:text-base font-bold"></span></p>
+          <p class="text-slate-400">Name: <span id="pName" class="text-white font-semibold"></span></p>
+          <p class="text-slate-400">Status: <span id="pStatus" class="font-bold"></span></p>
+          <p class="text-slate-400">Approved Date: <span id="pDate" class="text-slate-200"></span></p>
         </div>
+        <button onclick="generateVerification('Citizenship')" class="mt-4 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-xl text-xs transition">
+          Generate Verification Code & QR
+        </button>
       </div>
 
-      <!-- Temporary Pass Card -->
-      <div id="passCard" class="bg-slate-900 border border-amber-500/50 max-w-md mx-auto rounded-2xl p-6 shadow-2xl hidden">
+      <!-- Pass Card -->
+      <div id="passCard" class="glass-card border-amber-500/50 max-w-md mx-auto rounded-2xl p-6 shadow-2xl hidden">
         <div class="flex justify-between border-b border-slate-800 pb-3 mb-4">
           <div>
-            <p class="text-xs text-amber-400 uppercase font-semibold">Temporary Visitor Pass</p>
-            <h4 class="text-lg font-bold" id="passTypeHeader"></h4>
+            <p class="text-[10px] text-amber-400 uppercase tracking-widest font-bold">Temporary Visitor Pass</p>
+            <h4 class="text-base md:text-lg font-bold" id="passTypeHeader"></h4>
           </div>
           <span class="text-3xl">🎟️</span>
         </div>
-        <div class="space-y-2 text-sm">
-          <p class="text-xs text-slate-400">Pass ID: <span id="passIdVal" class="font-mono text-amber-300 font-bold"></span></p>
-          <p class="text-xs text-slate-400">Status: <span id="passStatusVal" class="font-bold"></span></p>
-          <p class="text-xs text-slate-400">Approval Time: <span id="passApprovedVal"></span></p>
-          <p class="text-xs text-slate-400">Expiration Time: <span id="passExpiresVal" class="text-amber-400 font-bold"></span></p>
+        <div class="space-y-2 text-xs md:text-sm">
+          <p class="text-slate-400">Pass ID: <span id="passIdVal" class="font-mono text-amber-300 font-bold"></span></p>
+          <p class="text-slate-400">Status: <span id="passStatusVal" class="font-bold"></span></p>
+          <p class="text-slate-400">Approval Time: <span id="passApprovedVal"></span></p>
+          <p class="text-slate-400">Expiration Time: <span id="passExpiresVal" class="text-amber-400 font-bold"></span></p>
         </div>
+        <button onclick="generateVerification('Pass')" class="mt-4 w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-xl text-xs transition">
+          Generate Verification Code & QR
+        </button>
       </div>
     </section>
 
   </main>
 
+  <!-- Verification Modal -->
+  <div id="verModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur flex items-center justify-center p-4">
+    <div class="glass-card max-w-sm w-full p-6 rounded-2xl text-center space-y-4 border border-amber-500/30">
+      <h3 class="text-lg font-bold text-amber-400">Identity Verification Code</h3>
+      <p class="text-xs text-slate-300">Show this code or QR code to the Admin to verify your identity.</p>
+      
+      <div id="verCodeDisplay" class="text-4xl font-mono font-black tracking-widest text-amber-300 py-2 bg-slate-950 rounded-xl border border-slate-800">
+        ------
+      </div>
+
+      <div id="qrcode" class="flex justify-center bg-white p-3 rounded-xl max-w-[180px] mx-auto"></div>
+
+      <div class="text-xs text-amber-400 font-semibold" id="verTimer">Expires in 3:00</div>
+      <button onclick="closeVerificationModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition">Close</button>
+    </div>
+  </div>
+
   <script>
     let currentUser = JSON.parse(localStorage.getItem('selimUser') || 'null');
+    let localToken = localStorage.getItem('selimAccountToken') || null;
+    let timerInterval = null;
 
     function showSection(sec) {
-      ['secLanding', 'secAuth', 'secApply', 'secDashboard'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      document.getElementById(sec === 'landing' ? 'secLanding' : sec === 'auth' ? 'secAuth' : sec === 'apply' ? 'secApply' : 'secDashboard').classList.remove('hidden');
+      if (localToken === "BANNED_TOKEN") sec = 'banned';
+      ['secLanding', 'secAuth', 'secApply', 'secDashboard', 'secBanned'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById(sec === 'landing' ? 'secLanding' : sec === 'auth' ? 'secAuth' : sec === 'apply' ? 'secApply' : sec === 'dashboard' ? 'secDashboard' : 'secBanned').classList.remove('hidden');
+    }
+
+    function triggerBanState() {
+      localStorage.setItem('selimAccountToken', "BANNED_TOKEN");
+      localToken = "BANNED_TOKEN";
+      document.getElementById('authHeaderState').innerHTML = `<span class="text-xs font-mono text-rose-500 font-bold">SYSTEM BANNED</span>`;
+      showSection('banned');
     }
 
     function switchAuthTab(tab) {
@@ -196,13 +241,13 @@
       if (tab === 'login') {
         document.getElementById('loginForm').classList.remove('hidden');
         document.getElementById('registerForm').classList.add('hidden');
-        document.getElementById('authTabLogin').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center';
-        document.getElementById('authTabRegister').className = 'font-bold text-slate-400 pb-2 w-1/2 text-center';
+        document.getElementById('authTabLogin').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center text-sm';
+        document.getElementById('authTabRegister').className = 'font-bold text-slate-400 pb-2 w-1/2 text-center text-sm';
       } else {
         document.getElementById('loginForm').classList.add('hidden');
         document.getElementById('registerForm').classList.remove('hidden');
-        document.getElementById('authTabRegister').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center';
-        document.getElementById('authTabLogin').className = 'font-bold text-slate-400 pb-2 w-1/2 text-center';
+        document.getElementById('authTabRegister').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center text-sm';
+        document.getElementById('authTabLogin').className = 'font-bold text-slate-400 pb-2 w-1/2 text-center text-sm';
       }
     }
 
@@ -210,21 +255,23 @@
       if (tab === 'citizenship') {
         document.getElementById('citizenshipForm').classList.remove('hidden');
         document.getElementById('passForm').classList.add('hidden');
-        document.getElementById('tabBtnCit').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2';
-        document.getElementById('tabBtnPass').className = 'font-bold text-slate-400 pb-2';
+        document.getElementById('tabBtnCit').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2 text-xs md:text-sm';
+        document.getElementById('tabBtnPass').className = 'font-bold text-slate-400 pb-2 text-xs md:text-sm';
       } else {
         document.getElementById('citizenshipForm').classList.add('hidden');
         document.getElementById('passForm').classList.remove('hidden');
-        document.getElementById('tabBtnPass').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2';
-        document.getElementById('tabBtnCit').className = 'font-bold text-slate-400 pb-2';
+        document.getElementById('tabBtnPass').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2 text-xs md:text-sm';
+        document.getElementById('tabBtnCit').className = 'font-bold text-slate-400 pb-2 text-xs md:text-sm';
       }
     }
 
     async function handleLogin(e) {
       e.preventDefault();
+      if (localToken === "BANNED_TOKEN") return triggerBanState();
+
       const msg = document.getElementById('authMsg');
-      msg.className = "mt-4 text-center font-semibold text-sm text-slate-400";
-      msg.innerText = "Authenticating...";
+      msg.className = "mt-4 text-center font-semibold text-xs text-slate-400";
+      msg.innerText = "Authenticating account...";
 
       const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -232,7 +279,8 @@
         body: JSON.stringify({
           action: "userLogin",
           email: document.getElementById('loginEmail').value,
-          password: document.getElementById('loginPassword').value
+          password: document.getElementById('loginPassword').value,
+          clientToken: localToken
         })
       });
 
@@ -240,19 +288,27 @@
       if (result.success) {
         currentUser = result.data;
         localStorage.setItem('selimUser', JSON.stringify(currentUser));
+        localStorage.setItem('selimAccountToken', currentUser.accountToken);
+        localToken = currentUser.accountToken;
         msg.innerText = "";
         fetchUserStatus();
       } else {
-        msg.className = "mt-4 text-center font-semibold text-sm text-rose-400";
-        msg.innerText = result.message;
+        if (result.message && result.message.includes("banned")) {
+          triggerBanState();
+        } else {
+          msg.className = "mt-4 text-center font-semibold text-xs text-rose-400";
+          msg.innerText = result.message;
+        }
       }
     }
 
     async function handleRegister(e) {
       e.preventDefault();
+      if (localToken === "BANNED_TOKEN") return triggerBanState();
+
       const msg = document.getElementById('authMsg');
-      msg.className = "mt-4 text-center font-semibold text-sm text-slate-400";
-      msg.innerText = "Registering...";
+      msg.className = "mt-4 text-center font-semibold text-xs text-slate-400";
+      msg.innerText = "Submitting registration request...";
 
       const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -261,33 +317,40 @@
           action: "userRegister",
           fullName: document.getElementById('regFullName').value,
           email: document.getElementById('regEmail').value,
-          password: document.getElementById('regPassword').value
+          password: document.getElementById('regPassword').value,
+          clientToken: localToken
         })
       });
 
       const result = await response.json();
       if (result.success) {
-        msg.className = "mt-4 text-center font-semibold text-sm text-emerald-400";
+        msg.className = "mt-4 text-center font-semibold text-xs text-emerald-400";
         msg.innerText = result.message;
         setTimeout(() => switchAuthTab('login'), 2000);
       } else {
-        msg.className = "mt-4 text-center font-semibold text-sm text-rose-400";
-        msg.innerText = result.message;
+        if (result.message && result.message.includes("Banned")) {
+          triggerBanState();
+        } else {
+          msg.className = "mt-4 text-center font-semibold text-xs text-rose-400";
+          msg.innerText = result.message;
+        }
       }
     }
 
     async function fetchUserStatus() {
+      if (localToken === "BANNED_TOKEN") return triggerBanState();
+
       document.getElementById('authHeaderState').innerHTML = `
         <div class="flex items-center space-x-3">
-          <span class="text-sm font-semibold text-amber-400">${currentUser.fullName}</span>
-          <button onclick="logout()" class="border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-sm hover:bg-slate-800">Sign Out</button>
+          <span class="text-xs md:text-sm font-semibold text-amber-400">${currentUser.fullName}</span>
+          <span class="text-[10px] md:text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700">Signed In</span>
         </div>
       `;
 
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: "getUserStatus", userId: currentUser.userId })
+        body: JSON.stringify({ action: "getUserStatus", userId: currentUser.userId, token: localToken })
       });
       const result = await res.json();
 
@@ -299,54 +362,50 @@
         document.getElementById('passportCard').classList.add('hidden');
         document.getElementById('passCard').classList.add('hidden');
 
-        // Check Account Approval Status First
+        if (userRecord.accountStatus === "Banned") return triggerBanState();
+
         if (userRecord.accountStatus !== "Approved") {
-          banner.innerHTML = `<span class="text-amber-400 font-bold">⏳ Account Approval Pending</span><br><span class="text-xs text-slate-400">An Admin must approve your user account before you can request citizenship or visitor passes.</span>`;
+          banner.innerHTML = `<span class="text-amber-400 font-bold text-base md:text-lg">⏳ Account Approval Pending</span><br><span class="text-xs text-slate-400 mt-1 block">Your account is pending Admin review before citizenship or pass requests are permitted.</span>`;
           return;
         }
 
         let citStatus = citizenRecord ? citizenRecord.status : null;
         let activePass = passes.find(p => p.status === "Approved");
+        let pendingPass = passes.find(p => p.status === "Pending");
 
         if (citStatus === "Approved") {
-          banner.innerHTML = `<span class="text-emerald-400 font-bold">✓ Active Official Citizenship</span>`;
+          banner.innerHTML = `<span class="text-emerald-400 font-bold text-base md:text-lg">✓ Active Official Citizenship</span>`;
           document.getElementById('passportCard').classList.remove('hidden');
           document.getElementById('pNum').innerText = citizenRecord.passportNumber;
           document.getElementById('pName').innerText = citizenRecord.fullName;
           document.getElementById('pStatus').innerText = citizenRecord.status;
           document.getElementById('pStatus').className = "font-bold text-emerald-400";
           document.getElementById('pDate').innerText = citizenRecord.issuedDate;
+          window.activeRefId = citizenRecord.passportNumber;
+        } else if (citStatus === "Pending") {
+          banner.innerHTML = `<span class="text-amber-400 font-bold text-base md:text-lg">⏳ Citizenship Application Pending</span><br><span class="text-xs text-slate-400 mt-1 block">Your application is currently under review by the Admin.</span><button onclick="cancelCitizenship()" class="mt-3 bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700 font-bold px-3 py-1.5 rounded-lg text-xs transition">Withdraw Application</button>`;
         } else if (citStatus === "Paused") {
-          banner.innerHTML = `<span class="text-amber-400 font-bold">⚠️ Citizenship Paused</span><br><span class="text-xs text-slate-400">Your citizenship is currently paused by the Sovereign Admin.</span>`;
-          document.getElementById('passportCard').classList.remove('hidden');
-          document.getElementById('pNum').innerText = citizenRecord.passportNumber;
-          document.getElementById('pName').innerText = citizenRecord.fullName;
-          document.getElementById('pStatus').innerText = "Paused";
-          document.getElementById('pStatus').className = "font-bold text-amber-400";
-          document.getElementById('pDate').innerText = citizenRecord.issuedDate;
+          banner.innerHTML = `<span class="text-amber-400 font-bold text-base md:text-lg">⚠️ Citizenship Paused</span>`;
         } else if (citStatus === "Revoked") {
-          banner.innerHTML = `<span class="text-rose-400 font-bold">🚫 Citizenship Revoked / Removed</span><br><span class="text-xs text-slate-400">Your citizenship status has been revoked.</span>`;
-          document.getElementById('passportCard').classList.remove('hidden');
-          document.getElementById('pNum').innerText = citizenRecord.passportNumber;
-          document.getElementById('pName').innerText = citizenRecord.fullName;
-          document.getElementById('pStatus').innerText = "Revoked";
-          document.getElementById('pStatus').className = "font-bold text-rose-400";
-          document.getElementById('pDate').innerText = citizenRecord.issuedDate;
+          banner.innerHTML = `<span class="text-rose-400 font-bold text-base md:text-lg">🚫 Citizenship Revoked</span>`;
         } else if (activePass) {
-          banner.innerHTML = `<span class="text-amber-400 font-bold">🎟️ Active Temporary Visitor Pass</span>`;
+          banner.innerHTML = `<span class="text-amber-400 font-bold text-base md:text-lg">🎟️ Active Temporary Visitor Pass</span>`;
           document.getElementById('passCard').classList.remove('hidden');
           document.getElementById('passTypeHeader').innerText = activePass.passType;
           document.getElementById('passIdVal').innerText = activePass.passId;
           document.getElementById('passStatusVal').innerText = activePass.status;
           document.getElementById('passApprovedVal').innerText = activePass.approvedAt;
           document.getElementById('passExpiresVal').innerText = activePass.expiresAt;
+          window.activePassRefId = activePass.passId;
+        } else if (pendingPass) {
+          banner.innerHTML = `<span class="text-amber-400 font-bold text-base md:text-lg">⏳ Visitor Pass Request Pending</span><br><span class="text-xs text-slate-400 mt-1 block">Requested Pass: ${pendingPass.passType}</span><button onclick="cancelPass()" class="mt-3 bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700 font-bold px-3 py-1.5 rounded-lg text-xs transition">Withdraw Pass Request</button>`;
         } else {
-          banner.innerHTML = `Account Approved! <button onclick="setupApplySection('${userRecord.requestsLocked}')" class="text-amber-400 underline ml-2 font-bold">Request Citizenship or Pass</button>`;
+          banner.innerHTML = `<span class="text-slate-200 font-semibold text-sm">Account Approved!</span> <button onclick="setupApplySection('${userRecord.requestsLocked}', '${userRecord.allowedMode}')" class="text-amber-400 hover:text-amber-300 underline ml-2 font-bold text-xs md:text-sm transition">Apply for Citizenship or Pass</button>`;
         }
       }
     }
 
-    function setupApplySection(requestsLocked) {
+    function setupApplySection(requestsLocked, allowedMode) {
       showSection('apply');
       document.getElementById('citEmail').value = currentUser.email;
       document.getElementById('citFullName').value = currentUser.fullName;
@@ -358,6 +417,17 @@
       } else {
         document.getElementById('applyLockNotice').classList.add('hidden');
         document.getElementById('applyFormWrap').classList.remove('hidden');
+
+        if (allowedMode === "Citizenship") {
+          switchFormTab('citizenship');
+          document.getElementById('tabBtnPass').classList.add('hidden');
+        } else if (allowedMode === "Passes") {
+          switchFormTab('pass');
+          document.getElementById('tabBtnCit').classList.add('hidden');
+        } else {
+          document.getElementById('tabBtnCit').classList.remove('hidden');
+          document.getElementById('tabBtnPass').classList.remove('hidden');
+        }
       }
     }
 
@@ -374,7 +444,8 @@
           action: "requestCitizenship",
           userId: currentUser.userId,
           fullName: document.getElementById('citFullName').value,
-          email: currentUser.email
+          email: currentUser.email,
+          token: localToken
         })
       });
       const result = await res.json();
@@ -402,7 +473,8 @@
           fullName: document.getElementById('passFullName').value,
           email: currentUser.email,
           passType: passText,
-          durationMinutes: durationSelect.value
+          durationMinutes: durationSelect.value,
+          token: localToken
         })
       });
       const result = await res.json();
@@ -412,14 +484,66 @@
       if (result.success) setTimeout(fetchUserStatus, 1500);
     }
 
-    function logout() {
-      localStorage.removeItem('selimUser');
-      currentUser = null;
-      window.location.reload();
+    async function cancelCitizenship() {
+      if (!confirm("Are you sure you want to withdraw your citizenship application?")) return;
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "cancelCitizenship", userId: currentUser.userId })
+      });
+      fetchUserStatus();
+    }
+
+    async function cancelPass() {
+      if (!confirm("Are you sure you want to withdraw your pass request?")) return;
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "cancelPass", userId: currentUser.userId })
+      });
+      fetchUserStatus();
+    }
+
+    async function generateVerification(type) {
+      const refId = type === "Citizenship" ? window.activeRefId : window.activePassRefId;
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "generateVerificationCode", userId: currentUser.userId, type, refId })
+      });
+      const result = await res.json();
+      if (result.success) {
+        document.getElementById('verCodeDisplay').innerText = result.data.code;
+        document.getElementById('qrcode').innerHTML = "";
+        new QRCode(document.getElementById('qrcode'), { text: result.data.code, width: 160, height: 160 });
+
+        const expiresAt = new Date(result.data.expiresAtISO).getTime();
+        document.getElementById('verModal').classList.remove('hidden');
+
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          const now = new Date().getTime();
+          const diff = Math.max(0, Math.floor((expiresAt - now) / 1000));
+          const mins = Math.floor(diff / 60);
+          const secs = diff % 60;
+          document.getElementById('verTimer').innerText = `Expires in ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+          if (diff <= 0) {
+            clearInterval(timerInterval);
+            closeVerificationModal();
+          }
+        }, 1000);
+      }
+    }
+
+    function closeVerificationModal() {
+      if (timerInterval) clearInterval(timerInterval);
+      document.getElementById('verModal').classList.add('hidden');
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      if (currentUser) {
+      if (localToken === "BANNED_TOKEN") {
+        triggerBanState();
+      } else if (currentUser) {
         fetchUserStatus();
       }
     });
