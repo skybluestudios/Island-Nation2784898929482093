@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Selim Island Nation - Official Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Descope Web Component SDK -->
-  <script src="https://unpkg.com/@descope/web-component@latest/dist/index.js"></script>
+  
+  <!-- Descope Web Component & SDK CDN Links -->
+  <script src="https://descopecdn.com/npm/@descope/web-component@3.59.2/dist/index.js"></script>
+  <script src="https://descopecdn.com/npm/@descope/web-js-sdk@1.50.3/dist/index.umd.js"></script>
+
   <style>
     .passport-card {
       background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
@@ -25,7 +28,7 @@
   <!-- Header -->
   <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('landing')">
         <span class="text-3xl">🏝️</span>
         <h1 class="text-xl font-bold tracking-wider text-amber-400">SELIM ISLAND NATION</h1>
       </div>
@@ -58,7 +61,10 @@
     <!-- Descope Auth View -->
     <section id="secAuth" class="hidden max-w-md mx-auto bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
       <h3 class="text-xl font-bold text-center text-amber-400 mb-6">Citizen Access Portal</h3>
-      <div id="descopeContainer"></div>
+      <div id="descopeContainer" class="flex justify-center bg-white p-4 rounded-lg">
+        <descope-wc id="descopeAuthWc" flow-id="sign-up-or-in" theme="light"></descope-wc>
+      </div>
+      <div id="descopeError" class="hidden text-rose-400 text-sm mt-4 text-center"></div>
     </section>
 
     <!-- Citizenship Application Form -->
@@ -132,6 +138,7 @@
 
   <script>
     let currentUser = null;
+    let descopeSdk = null;
 
     // View Manager
     function showSection(section) {
@@ -139,28 +146,56 @@
         document.getElementById(id).classList.add('hidden');
       });
       if (section === 'landing') document.getElementById('secLanding').classList.remove('hidden');
-      if (section === 'auth') {
-        document.getElementById('secAuth').classList.remove('hidden');
-        initDescope();
-      }
+      if (section === 'auth') document.getElementById('secAuth').classList.remove('hidden');
       if (section === 'apply') document.getElementById('secApply').classList.remove('hidden');
       if (section === 'dashboard') document.getElementById('secDashboard').classList.remove('hidden');
     }
 
     // Initialize Descope Authentication
     function initDescope() {
-      const container = document.getElementById('descopeContainer');
-      container.innerHTML = `<descope-wc project-id="${DESCOPE_PROJECT_ID}" flow-id="sign-up-or-in"></descope-wc>`;
-      
-      const descopeWcEl = document.querySelector('descope-wc');
-      descopeWcEl.addEventListener('success', (e) => {
+      // Set project ID dynamically on web component
+      const descopeWc = document.getElementById('descopeAuthWc');
+      descopeWc.setAttribute('project-id', DESCOPE_PROJECT_ID);
+
+      // Initialize Descope SDK
+      if (typeof Descope !== 'undefined') {
+        descopeSdk = Descope({ projectId: DESCOPE_PROJECT_ID });
+        checkExistingSession();
+      }
+
+      // Descope Web Component Event Listeners
+      descopeWc.addEventListener('success', (e) => {
+        const user = e.detail.user;
         currentUser = {
-          userId: e.detail.user.userId,
-          email: e.detail.user.email,
-          name: e.detail.user.name || ""
+          userId: user.userId,
+          email: user.email,
+          name: user.name || ""
         };
         handlePostLogin();
       });
+
+      descopeWc.addEventListener('error', (e) => {
+        const errDiv = document.getElementById('descopeError');
+        errDiv.classList.remove('hidden');
+        errDiv.innerText = "Authentication failed. Please try again.";
+      });
+    }
+
+    // Check for an active session JWT token
+    async function checkExistingSession() {
+      if (!descopeSdk) return;
+      const sessionToken = descopeSdk.getSessionToken();
+      if (sessionToken && !descopeSdk.isJwtExpired(sessionToken)) {
+        const user = descopeSdk.getUser();
+        if (user) {
+          currentUser = {
+            userId: user.userId,
+            email: user.email,
+            name: user.name || ""
+          };
+          handlePostLogin();
+        }
+      }
     }
 
     // Handle flow after successful authentication
@@ -172,27 +207,29 @@
       `;
 
       // Fetch citizenship record from Apps Script backend
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: "getUserPassport", descopeUserId: currentUser.userId })
-      });
-      
-      const result = await response.json();
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: "getUserPassport", descopeUserId: currentUser.userId })
+        });
+        
+        const result = await response.json();
 
-      if (result.success) {
-        // Record found -> show Dashboard
-        showSection('dashboard');
-        renderPassport(result.data);
-      } else {
-        // No record -> show application form
-        showSection('apply');
-        document.getElementById('appEmail').value = currentUser.email;
-        if (currentUser.name) document.getElementById('appFullName').value = currentUser.name;
+        if (result.success) {
+          showSection('dashboard');
+          renderPassport(result.data);
+        } else {
+          showSection('apply');
+          document.getElementById('appEmail').value = currentUser.email;
+          if (currentUser.name) document.getElementById('appFullName').value = currentUser.name;
+        }
+      } catch (err) {
+        console.error("Backend request failed", err);
       }
     }
 
-    // Submit Application
+    // Submit Citizenship Application
     async function submitApplication(e) {
       e.preventDefault();
       const btn = document.getElementById('btnSubmitApp');
@@ -209,23 +246,30 @@
         phone: document.getElementById('appPhone').value
       };
 
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
 
-      const result = await response.json();
-      btn.disabled = false;
-      btn.innerText = "Submit Application";
+        const result = await response.json();
+        btn.disabled = false;
+        btn.innerText = "Submit Application";
 
-      if (result.success) {
-        statusMsg.className = "mt-4 text-center font-semibold text-emerald-400";
-        statusMsg.innerText = "Application submitted! Reviewing details...";
-        setTimeout(() => handlePostLogin(), 1500);
-      } else {
+        if (result.success) {
+          statusMsg.className = "mt-4 text-center font-semibold text-emerald-400";
+          statusMsg.innerText = "Application submitted! Reviewing details...";
+          setTimeout(() => handlePostLogin(), 1500);
+        } else {
+          statusMsg.className = "mt-4 text-center font-semibold text-rose-400";
+          statusMsg.innerText = result.message;
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerText = "Submit Application";
         statusMsg.className = "mt-4 text-center font-semibold text-rose-400";
-        statusMsg.innerText = result.message;
+        statusMsg.innerText = "Failed to submit application. Please check backend configuration.";
       }
     }
 
@@ -251,9 +295,19 @@
     }
 
     function logout() {
-      currentUser = null;
-      window.location.reload();
+      if (descopeSdk) {
+        descopeSdk.logout().then(() => {
+          currentUser = null;
+          window.location.reload();
+        });
+      } else {
+        currentUser = null;
+        window.location.reload();
+      }
     }
+
+    // On page load, initialize Descope
+    window.addEventListener('DOMContentLoaded', initDescope);
   </script>
 </body>
 </html>
