@@ -5,68 +5,107 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Selim Island - Admin Console</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- HTML5-QRCode Scanner Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-amber-500 selection:text-slate-950">
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBG5L210aazB1GwIGJylYP9qB1PkC90g8PULavdk2W0p9Os-4moolYamcKBKVYQ9QF/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzKpNvIhvQq6kZs3xTUNh06b43VJ0tXu26ib5goDH5ZDKOyiDwYXFWpwOHkoUDKUTSa/exec";
   </script>
 
-  <header class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center">
-    <h1 class="text-xl font-bold text-amber-400">🛡️ Admin Console - Selim Island Nation</h1>
-    <button id="btnLogout" onclick="window.location.reload()" class="hidden text-sm bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded">Sign Out</button>
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 md:px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center space-x-3">
+      <span class="text-xl md:text-2xl">🛡️</span>
+      <h1 class="text-sm md:text-lg font-bold tracking-wider text-amber-400">Selim Island Nation Administration</h1>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button id="btnOpenScanner" onclick="openScannerModal()" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition">📷 Scan QR / Code</button>
+      <button id="btnLogout" onclick="window.location.reload()" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg font-semibold transition border border-slate-700">Sign Out</button>
+    </div>
   </header>
 
-  <main class="max-w-7xl mx-auto p-6">
+  <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
 
     <!-- Admin Authentication View -->
-    <div id="adminLoginView" class="max-w-md mx-auto my-20 bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl">
-      <h2 class="text-xl font-bold text-center text-amber-400 mb-6">Admin Authentication</h2>
+    <div id="adminLoginView" class="max-w-md mx-auto my-12 md:my-20 glass-card p-6 md:p-8 rounded-2xl shadow-2xl">
+      <h2 class="text-xl font-bold text-center text-amber-400 mb-6 tracking-wide">Admin Passcode Required</h2>
       <form onsubmit="authenticateAdmin(event)" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium mb-1">Admin Password</label>
-          <input type="password" id="adminPasswordInput" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Admin Password</label>
+          <input type="password" id="adminPasswordInput" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm focus:border-amber-400 focus:outline-none">
         </div>
-        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded">Login</button>
+        <button type="submit" id="btnAdminLogin" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition text-sm">Login to Console</button>
       </form>
-      <div id="loginError" class="mt-4 text-center text-rose-400 text-sm"></div>
+      <div id="loginError" class="mt-4 text-center text-rose-400 text-sm font-semibold"></div>
     </div>
 
     <!-- Admin Console Dashboard -->
     <div id="adminConsoleView" class="hidden space-y-6">
       
       <!-- Category Tabs -->
-      <div class="flex flex-wrap border-b border-slate-800 gap-2 pb-2 text-xs font-semibold">
-        <button onclick="switchTab('pending_users')" id="tab_pending_users" class="px-3 py-2 rounded bg-amber-500 text-slate-950">Pending Account Approvals</button>
-        <button onclick="switchTab('registered_users')" id="tab_registered_users" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Approved User Accounts</button>
-        <button onclick="switchTab('current_citizen')" id="tab_current_citizen" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Current Citizens</button>
-        <button onclick="switchTab('current_pass')" id="tab_current_pass" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Current Pass Holders</button>
-        <button onclick="switchTab('pending_citizen')" id="tab_pending_citizen" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Pending Citizens</button>
-        <button onclick="switchTab('pending_pass')" id="tab_pending_pass" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Pending Pass Holders</button>
-        <button onclick="switchTab('expired_pass')" id="tab_expired_pass" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Expired Pass Holders</button>
-        <button onclick="switchTab('paused_citizen')" id="tab_paused_citizen" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Citizenship Paused / Removed</button>
+      <div class="flex flex-wrap border-b border-slate-800 gap-1.5 md:gap-2 pb-2 text-xs font-semibold">
+        <button onclick="switchTab('pending_users')" id="tab_pending_users" class="px-3 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold transition">Pending Approvals</button>
+        <button onclick="switchTab('registered_users')" id="tab_registered_users" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 transition">Approved Accounts</button>
+        <button onclick="switchTab('current_citizen')" id="tab_current_citizen" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 transition">Current Citizens</button>
+        <button onclick="switchTab('current_pass')" id="tab_current_pass" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 transition">Current Pass Holders</button>
+        <button onclick="switchTab('pending_citizen')" id="tab_pending_citizen" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 transition">Pending Citizens</button>
+        <button onclick="switchTab('pending_pass')" id="tab_pending_pass" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 transition">Pending Pass Holders</button>
+        <button onclick="switchTab('expired_pass')" id="tab_expired_pass" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 transition">Expired Passes</button>
+        <button onclick="switchTab('paused_citizen')" id="tab_paused_citizen" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 transition">Paused / Revoked Citizens</button>
+        <button onclick="switchTab('banned_users')" id="tab_banned_users" class="px-3 py-2 rounded-xl bg-slate-800 text-slate-300 transition">Banned Users</button>
       </div>
 
       <!-- Data Table -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-x-auto shadow-xl">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 text-xs uppercase">
+      <div class="glass-card rounded-2xl overflow-x-auto shadow-2xl border border-slate-800/80">
+        <table class="w-full text-left text-xs md:text-sm">
+          <thead class="bg-slate-950/80 text-slate-400 border-b border-slate-800 text-[10px] md:text-xs uppercase tracking-wider">
             <tr id="tableHeaders"></tr>
           </thead>
-          <tbody id="adminTableBody" class="divide-y divide-slate-800"></tbody>
+          <tbody id="adminTableBody" class="divide-y divide-slate-800/60"></tbody>
         </table>
       </div>
     </div>
 
   </main>
 
+  <!-- Scanner & Verification Modal -->
+  <div id="scannerModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-6 rounded-2xl space-y-4 border border-amber-500/30">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-amber-400">Verify Identity Code or QR</h3>
+        <button onclick="closeScannerModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <div class="flex gap-2">
+        <input type="text" id="manualCodeInput" placeholder="Enter 6-digit code" class="flex-grow bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono text-center tracking-widest text-base">
+        <button onclick="verifyCodeManual()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 rounded-xl text-xs">Verify</button>
+      </div>
+
+      <div class="border-t border-slate-800 pt-3">
+        <p class="text-xs text-slate-400 text-center mb-2">Or Scan QR Code via Camera</p>
+        <div id="qr-reader" class="rounded-xl overflow-hidden border border-slate-800"></div>
+      </div>
+
+      <div id="verifyResult" class="hidden p-3 rounded-xl text-xs font-semibold text-center"></div>
+    </div>
+  </div>
+
   <script>
     let adminPwd = "";
     let rawData = { users: [], citizens: [], passes: [] };
     let currentTab = "pending_users";
+    let html5QrcodeScanner = null;
 
     async function authenticateAdmin(e) {
       e.preventDefault();
+      const btn = document.getElementById('btnAdminLogin');
+      btn.disabled = true;
+      btn.innerText = "Authenticating...";
+
       adminPwd = document.getElementById('adminPasswordInput').value;
       
       const res = await fetch(APPS_SCRIPT_URL, {
@@ -75,11 +114,14 @@
         body: JSON.stringify({ action: "adminVerifyPassword", adminPassword: adminPwd })
       });
       const result = await res.json();
+      btn.disabled = false;
+      btn.innerText = "Login to Console";
 
       if (result.success) {
         document.getElementById('adminLoginView').classList.add('hidden');
         document.getElementById('adminConsoleView').classList.remove('hidden');
         document.getElementById('btnLogout').classList.remove('hidden');
+        document.getElementById('btnOpenScanner').classList.remove('hidden');
         loadAllData();
       } else {
         document.getElementById('loginError').innerText = result.message;
@@ -101,8 +143,8 @@
 
     function switchTab(tabKey) {
       currentTab = tabKey;
-      ['pending_users','registered_users','current_citizen','current_pass','pending_citizen','pending_pass','expired_pass','paused_citizen'].forEach(k => {
-        document.getElementById('tab_' + k).className = k === tabKey ? "px-3 py-2 rounded bg-amber-500 text-slate-950 font-bold" : "px-3 py-2 rounded bg-slate-800 text-slate-300 font-semibold";
+      ['pending_users','registered_users','current_citizen','current_pass','pending_citizen','pending_pass','expired_pass','paused_citizen','banned_users'].forEach(k => {
+        document.getElementById('tab_' + k).className = k === tabKey ? "px-3 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold transition shadow-lg shadow-amber-500/10" : "px-3 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold transition hover:bg-slate-700";
       });
       renderCurrentTab();
     }
@@ -112,28 +154,42 @@
       const tbody = document.getElementById('adminTableBody');
       tbody.innerHTML = "";
 
-      if (currentTab === "pending_users" || currentTab === "registered_users") {
-        headers.innerHTML = `<th class="p-4">User ID</th><th class="p-4">Full Name</th><th class="p-4">Email</th><th class="p-4">Account Status</th><th class="p-4">Request Mode</th><th class="p-4">Actions</th>`;
+      if (currentTab === "pending_users" || currentTab === "registered_users" || currentTab === "banned_users") {
+        headers.innerHTML = `<th class="p-3">User ID</th><th class="p-3">Full Name</th><th class="p-3">Email</th><th class="p-3">Account Status</th><th class="p-3">Request Mode</th><th class="p-3">Allowed Type</th><th class="p-3">Actions</th>`;
         
-        let filtered = rawData.users.filter(u => currentTab === "pending_users" ? u.accountStatus === "Pending" : u.accountStatus === "Approved");
+        let filtered = rawData.users.filter(u => {
+          if (currentTab === "pending_users") return u.accountStatus === "Pending";
+          if (currentTab === "registered_users") return u.accountStatus === "Approved";
+          if (currentTab === "banned_users") return u.accountStatus === "Banned";
+        });
 
         filtered.forEach(u => {
           const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-900/40 transition";
           tr.innerHTML = `
-            <td class="p-4 font-mono font-bold text-amber-300">${u.userId}</td>
-            <td class="p-4 font-medium text-white">${u.fullName}</td>
-            <td class="p-4 text-xs">${u.email}</td>
-            <td class="p-4 font-bold ${u.accountStatus === 'Approved' ? 'text-emerald-400' : 'text-amber-400'}">${u.accountStatus}</td>
-            <td class="p-4 text-xs font-semibold ${u.requestsLocked === 'Yes' ? 'text-rose-400' : 'text-slate-300'}">${u.requestsLocked === 'Yes' ? '🔒 Locked' : '🔓 Allowed'}</td>
-            <td class="p-4 space-x-1">
-              ${u.accountStatus !== 'Approved' ? `<button onclick="updateUserAccount(this, '${u.userId}', 'Approved', undefined)" class="bg-emerald-600 text-xs px-2 py-1 rounded">Approve Account</button>` : ''}
-              ${u.requestsLocked !== 'Yes' ? `<button onclick="updateUserAccount(this, '${u.userId}', undefined, 'Yes')" class="bg-rose-600 text-xs px-2 py-1 rounded">Lock Requests</button>` : `<button onclick="updateUserAccount(this, '${u.userId}', undefined, 'No')" class="bg-slate-700 text-xs px-2 py-1 rounded">Unlock Requests</button>`}
+            <td class="p-3 font-mono font-bold text-amber-300 text-xs">${u.userId}</td>
+            <td class="p-3 font-medium text-white">${u.fullName}</td>
+            <td class="p-3 text-xs text-slate-300">${u.email}</td>
+            <td class="p-3 font-bold text-xs ${u.accountStatus === 'Approved' ? 'text-emerald-400' : u.accountStatus === 'Banned' ? 'text-rose-500' : 'text-amber-400'}">${u.accountStatus}</td>
+            <td class="p-3 text-xs font-semibold ${u.requestsLocked === 'Yes' ? 'text-rose-400' : 'text-slate-400'}">${u.requestsLocked === 'Yes' ? '🔒 Locked' : '🔓 Allowed'}</td>
+            <td class="p-3 text-xs">
+              <select onchange="updateUserAccount(this, '${u.userId}', undefined, undefined, this.value)" class="bg-slate-950 border border-slate-800 text-xs rounded-lg p-1 text-slate-200">
+                <option value="Both" ${u.allowedMode === 'Both' ? 'selected' : ''}>Both</option>
+                <option value="Citizenship" ${u.allowedMode === 'Citizenship' ? 'selected' : ''}>Citizenship Only</option>
+                <option value="Passes" ${u.allowedMode === 'Passes' ? 'selected' : ''}>Passes Only</option>
+              </select>
+            </td>
+            <td class="p-3 space-x-1 space-y-1">
+              ${u.accountStatus !== 'Approved' ? `<button onclick="updateUserAccount(this, '${u.userId}', 'Approved')" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-2 py-1 rounded-lg font-bold transition">Approve</button>` : ''}
+              ${u.accountStatus !== 'Banned' ? `<button onclick="updateUserAccount(this, '${u.userId}', 'Banned')" class="bg-rose-600 hover:bg-rose-500 text-xs px-2 py-1 rounded-lg font-bold transition">Ban</button>` : `<button onclick="updateUserAccount(this, '${u.userId}', 'Approved')" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-2 py-1 rounded-lg font-bold transition">Unban</button>`}
+              <button onclick="editUserProfile('${u.userId}', '${u.email}')" class="bg-slate-700 hover:bg-slate-600 text-xs px-2 py-1 rounded-lg font-bold transition">Edit Profile</button>
+              <button onclick="directGrantModal('${u.userId}')" class="bg-amber-600 hover:bg-amber-500 text-xs px-2 py-1 rounded-lg font-bold transition">Direct Grant</button>
             </td>
           `;
           tbody.appendChild(tr);
         });
       } else if (currentTab.includes("citizen")) {
-        headers.innerHTML = `<th class="p-4">Passport No</th><th class="p-4">Applicant</th><th class="p-4">Email</th><th class="p-4">Status</th><th class="p-4">Approval Date</th><th class="p-4">Actions</th>`;
+        headers.innerHTML = `<th class="p-3">Passport No</th><th class="p-3">Applicant</th><th class="p-3">Email</th><th class="p-3">Status</th><th class="p-3">Approval Date</th><th class="p-3">Actions</th>`;
         
         let filtered = rawData.citizens.filter(c => {
           if (currentTab === "current_citizen") return c.status === "Approved";
@@ -143,22 +199,23 @@
 
         filtered.forEach(c => {
           const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-900/40 transition";
           tr.innerHTML = `
-            <td class="p-4 font-mono font-bold text-amber-300">${c.passportNumber}</td>
-            <td class="p-4">${c.fullName}</td>
-            <td class="p-4 text-xs">${c.email}</td>
-            <td class="p-4 font-bold ${c.status === 'Approved' ? 'text-emerald-400' : c.status === 'Paused' ? 'text-amber-400' : 'text-rose-400'}">${c.status}</td>
-            <td class="p-4 text-xs">${c.issuedDate}</td>
-            <td class="p-4 space-x-1">
-              ${c.status !== 'Approved' ? `<button onclick="updateCit(this, '${c.passportNumber}','Approved')" class="bg-emerald-600 text-xs px-2 py-1 rounded">Approve</button>` : ''}
-              ${c.status !== 'Paused' ? `<button onclick="updateCit(this, '${c.passportNumber}','Paused')" class="bg-amber-600 text-xs px-2 py-1 rounded">Pause</button>` : ''}
-              ${c.status !== 'Revoked' ? `<button onclick="updateCit(this, '${c.passportNumber}','Revoked')" class="bg-rose-600 text-xs px-2 py-1 rounded">Revoke</button>` : ''}
+            <td class="p-3 font-mono font-bold text-amber-300 text-xs">${c.passportNumber}</td>
+            <td class="p-3 font-medium text-white">${c.fullName}</td>
+            <td class="p-3 text-xs text-slate-300">${c.email}</td>
+            <td class="p-3 font-bold text-xs ${c.status === 'Approved' ? 'text-emerald-400' : c.status === 'Paused' ? 'text-amber-400' : 'text-rose-400'}">${c.status}</td>
+            <td class="p-3 text-xs text-slate-400">${c.issuedDate}</td>
+            <td class="p-3 space-x-1">
+              ${c.status !== 'Approved' ? `<button onclick="updateCit(this, '${c.passportNumber}','Approved')" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-2.5 py-1 rounded-lg font-bold transition">Approve</button>` : ''}
+              ${c.status !== 'Paused' ? `<button onclick="updateCit(this, '${c.passportNumber}','Paused')" class="bg-amber-600 hover:bg-amber-500 text-xs px-2.5 py-1 rounded-lg font-bold transition">Pause</button>` : ''}
+              ${c.status !== 'Revoked' ? `<button onclick="updateCit(this, '${c.passportNumber}','Revoked')" class="bg-rose-600 hover:bg-rose-500 text-xs px-2.5 py-1 rounded-lg font-bold transition">Revoke</button>` : ''}
             </td>
           `;
           tbody.appendChild(tr);
         });
       } else {
-        headers.innerHTML = `<th class="p-4">Pass ID</th><th class="p-4">Applicant</th><th class="p-4">Type</th><th class="p-4">Status</th><th class="p-4">Approval Date & Time</th><th class="p-4">Expiration Time</th><th class="p-4">Actions</th>`;
+        headers.innerHTML = `<th class="p-3">Pass ID</th><th class="p-3">Applicant</th><th class="p-3">Type</th><th class="p-3">Status</th><th class="p-3">Approval Date & Time</th><th class="p-3">Expiration Time</th><th class="p-3">Actions</th>`;
         
         let filtered = rawData.passes.filter(p => {
           if (currentTab === "current_pass") return p.status === "Approved";
@@ -168,16 +225,17 @@
 
         filtered.forEach(p => {
           const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-900/40 transition";
           tr.innerHTML = `
-            <td class="p-4 font-mono font-bold text-amber-300">${p.passId}</td>
-            <td class="p-4">${p.fullName}</td>
-            <td class="p-4 text-xs font-semibold">${p.passType}</td>
-            <td class="p-4 font-bold">${p.status}</td>
-            <td class="p-4 text-xs">${p.approvedAt}</td>
-            <td class="p-4 text-xs text-amber-400 font-bold">${p.expiresAt}</td>
-            <td class="p-4 space-x-1">
-              ${p.status !== 'Approved' ? `<button onclick="updatePass(this, '${p.passId}','Approved')" class="bg-emerald-600 text-xs px-2 py-1 rounded">Approve</button>` : ''}
-              ${p.status !== 'Revoked' ? `<button onclick="updatePass(this, '${p.passId}','Revoked')" class="bg-rose-600 text-xs px-2 py-1 rounded">Revoke</button>` : ''}
+            <td class="p-3 font-mono font-bold text-amber-300 text-xs">${p.passId}</td>
+            <td class="p-3 font-medium text-white">${p.fullName}</td>
+            <td class="p-3 text-xs font-semibold text-slate-300">${p.passType}</td>
+            <td class="p-3 font-bold text-xs ${p.status === 'Approved' ? 'text-emerald-400' : 'text-slate-400'}">${p.status}</td>
+            <td class="p-3 text-xs text-slate-400">${p.approvedAt}</td>
+            <td class="p-3 text-xs text-amber-400 font-bold">${p.expiresAt}</td>
+            <td class="p-3 space-x-1">
+              ${p.status !== 'Approved' ? `<button onclick="approvePassCustomDuration(this, '${p.passId}', '${p.durationMinutes}')" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-2.5 py-1 rounded-lg font-bold transition">Approve Custom</button>` : ''}
+              ${p.status !== 'Revoked' ? `<button onclick="updatePass(this, '${p.passId}','Revoked')" class="bg-rose-600 hover:bg-rose-500 text-xs px-2.5 py-1 rounded-lg font-bold transition">Revoke</button>` : ''}
             </td>
           `;
           tbody.appendChild(tr);
@@ -185,15 +243,59 @@
       }
     }
 
-    async function updateUserAccount(btn, userId, newAccountStatus, requestsLocked) {
+    async function updateUserAccount(btn, userId, newAccountStatus, requestsLocked, allowedMode) {
+      if (btn) { btn.disabled = true; btn.innerText = "Updating..."; }
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "adminUpdateUserAccount", adminPassword: adminPwd, userId, newAccountStatus, requestsLocked, allowedMode })
+      });
+      await loadAllData();
+    }
+
+    async function editUserProfile(userId, currentEmail) {
+      const newEmail = prompt("Edit Email Address:", currentEmail);
+      if (newEmail === null) return;
+      const newPass = prompt("Set New Password (leave blank to keep current):");
+
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "adminUpdateUserAccount", adminPassword: adminPwd, userId, email: newEmail, password: newPass })
+      });
+      loadAllData();
+    }
+
+    async function directGrantModal(userId) {
+      const type = prompt("Type '1' for Direct Citizenship Grant or '2' for Direct Pass Grant:");
+      if (type === '1') {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: "adminDirectGrant", adminPassword: adminPwd, userId, grantType: "Citizenship" })
+        });
+      } else if (type === '2') {
+        const dur = prompt("Enter pass duration in minutes (e.g. 5, 15, 1440 for 1 Day):", "15");
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: "adminDirectGrant", adminPassword: adminPwd, userId, grantType: "Pass", passType: dur + " Minutes Pass", durationMinutes: dur })
+        });
+      }
+      loadAllData();
+    }
+
+    async function approvePassCustomDuration(btn, passId, currentDur) {
+      const newDur = prompt("Confirm or change duration in minutes for this pass:", currentDur);
+      if (newDur === null) return;
       btn.disabled = true;
       btn.innerText = "Updating...";
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: "adminUpdateUserAccount", adminPassword: adminPwd, userId, newAccountStatus, requestsLocked })
+        body: JSON.stringify({ action: "adminUpdatePassStatus", adminPassword: adminPwd, passId, newStatus: "Approved", overrideDurationMinutes: newDur })
       });
-      await loadAllData();
+      loadAllData();
     }
 
     async function updateCit(btn, passportNumber, newStatus) {
@@ -216,6 +318,45 @@
         body: JSON.stringify({ action: "adminUpdatePassStatus", adminPassword: adminPwd, passId, newStatus })
       });
       await loadAllData();
+    }
+
+    function openScannerModal() {
+      document.getElementById('scannerModal').classList.remove('hidden');
+      document.getElementById('verifyResult').classList.add('hidden');
+      if (!html5QrcodeScanner) {
+        html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: { width: 200, height: 200 } });
+        html5QrcodeScanner.render((decodedText) => {
+          document.getElementById('manualCodeInput').value = decodedText;
+          verifyCodeManual();
+        });
+      }
+    }
+
+    function closeScannerModal() {
+      document.getElementById('scannerModal').classList.add('hidden');
+    }
+
+    async function verifyCodeManual() {
+      const code = document.getElementById('manualCodeInput').value;
+      const resDiv = document.getElementById('verifyResult');
+      resDiv.classList.remove('hidden');
+      resDiv.className = "p-3 rounded-xl text-xs font-semibold text-center bg-slate-900 text-amber-400";
+      resDiv.innerText = "Verifying code...";
+
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "adminVerifyCode", adminPassword: adminPwd, code })
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        resDiv.className = "p-3 rounded-xl text-xs font-semibold text-center bg-emerald-950 text-emerald-300 border border-emerald-800";
+        resDiv.innerHTML = `✓ VALID IDENTITY VERIFIED!<br>Type: ${result.data.type}<br>ID: ${result.data.refId}<br>Holder: ${result.data.details.fullName || 'Verified'}`;
+      } else {
+        resDiv.className = "p-3 rounded-xl text-xs font-semibold text-center bg-rose-950 text-rose-300 border border-rose-800";
+        resDiv.innerText = "✕ " + result.message;
+      }
     }
   </script>
 </body>
