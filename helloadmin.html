@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selim Island - Admin Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqwek057AkqjAk_TpxIfvELN1SpwOUj9wN4ifB92bwSelQw5uahsF1cmaqgVuFSmvu/exec";
+  </script>
+
+  <header class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+      <span>🛡️</span> Selim Island Admin Administration
+    </h1>
+    <button id="btnLogout" onclick="adminLogout()" class="hidden text-sm bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded">Sign Out</button>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-6">
+
+    <!-- Admin Authentication View -->
+    <div id="adminLoginView" class="max-w-md mx-auto my-20 bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl">
+      <h2 class="text-xl font-bold text-center text-amber-400 mb-6">Admin Access Required</h2>
+      <form onsubmit="authenticateAdmin(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Admin Password</label>
+          <input type="password" id="adminPasswordInput" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded transition">
+          Authenticate
+        </button>
+      </form>
+      <div id="loginError" class="mt-4 text-center text-rose-400 text-sm"></div>
+    </div>
+
+    <!-- Admin Console View -->
+    <div id="adminConsoleView" class="hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold">Citizenship Applications</h2>
+        <button onclick="loadCitizens()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm px-4 py-2 rounded">
+          Refresh List
+        </button>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase text-xs">
+            <tr>
+              <th class="p-4">Passport No.</th>
+              <th class="p-4">Applicant</th>
+              <th class="p-4">Contact</th>
+              <th class="p-4">Status</th>
+              <th class="p-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="citizenTableBody" class="divide-y divide-slate-800">
+            <!-- Dynamically Populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let currentAdminPassword = "";
+
+    async function authenticateAdmin(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('adminPasswordInput').value;
+      const errorDiv = document.getElementById('loginError');
+      errorDiv.innerText = "Verifying...";
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "adminVerifyPassword", adminPassword: pwd })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        currentAdminPassword = pwd;
+        document.getElementById('adminLoginView').classList.add('hidden');
+        document.getElementById('adminConsoleView').classList.remove('hidden');
+        document.getElementById('btnLogout').classList.remove('hidden');
+        loadCitizens();
+      } else {
+        errorDiv.innerText = result.message || "Invalid password.";
+      }
+    }
+
+    async function loadCitizens() {
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "adminGetCitizens", adminPassword: currentAdminPassword })
+      });
+
+      const result = await response.json();
+      if (!result.success) return alert("Session expired or unauthorized.");
+
+      const tbody = document.getElementById('citizenTableBody');
+      tbody.innerHTML = "";
+
+      result.data.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/50 transition";
+        tr.innerHTML = `
+          <td class="p-4 font-mono font-semibold text-amber-300">${c.passportNumber}</td>
+          <td class="p-4">
+            <div class="font-medium text-white">${c.fullName}</div>
+            <div class="text-xs text-slate-500">ID: ${c.descopeUserId}</div>
+          </td>
+          <td class="p-4 text-xs">
+            <div>${c.email}</div>
+            <div class="text-slate-400">${c.phone || "N/A"}</div>
+          </td>
+          <td class="p-4">
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${
+              c.status === 'Approved' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
+              c.status === 'Pending' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
+              'bg-rose-950 text-rose-400 border border-rose-800'
+            }">
+              ${c.status}
+            </span>
+          </td>
+          <td class="p-4 space-x-2">
+            ${c.status !== 'Approved' ? `
+              <button onclick="updateStatus('${c.passportNumber}', 'Approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded">
+                Approve
+              </button>` : ''}
+            ${c.status !== 'Revoked' ? `
+              <button onclick="updateStatus('${c.passportNumber}', 'Revoked')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs px-2.5 py-1 rounded">
+                Revoke
+              </button>` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function updateStatus(passportNumber, newStatus) {
+      if (!confirm(`Are you sure you want to mark ${passportNumber} as ${newStatus}?`)) return;
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: "adminUpdateStatus",
+          adminPassword: currentAdminPassword,
+          passportNumber: passportNumber,
+          newStatus: newStatus
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        loadCitizens();
+      } else {
+        alert(result.message);
+      }
+    }
+
+    function adminLogout() {
+      currentAdminPassword = "";
+      window.location.reload();
+    }
+  </script>
+</body>
+</html>
