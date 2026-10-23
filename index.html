@@ -12,7 +12,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEKm6ZdDwe6rLLRLyfcQRk8xdx0NwGgrZYRlzfdxTscIUFC1VhfZ9_XgQX0VVeHJo/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBG5L210aazB1GwIGJylYP9qB1PkC90g8PULavdk2W0p9Os-4moolYamcKBKVYQ9QF/exec";
   </script>
 
   <!-- Header -->
@@ -78,62 +78,68 @@
           <input type="password" id="regPassword" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
         </div>
         <button type="submit" id="btnRegSubmit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded transition">
-          Register
+          Register Account
         </button>
       </form>
 
       <div id="authMsg" class="mt-4 text-center font-semibold text-sm"></div>
     </section>
 
-    <!-- Application Selection / Request Form -->
+    <!-- Application Form View -->
     <section id="secApply" class="hidden max-w-2xl mx-auto bg-slate-900 p-8 rounded-xl border border-slate-800 shadow-xl space-y-6">
-      <div class="flex border-b border-slate-800 gap-4 pb-2">
-        <button id="tabBtnCit" onclick="switchFormTab('citizenship')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2">Citizenship Application</button>
-        <button id="tabBtnPass" onclick="switchFormTab('pass')" class="font-bold text-slate-400 pb-2">Temporary Visitor Pass</button>
+      <div id="applyLockNotice" class="hidden p-3 bg-rose-950 border border-rose-800 text-rose-300 rounded text-center text-sm font-semibold">
+        🔒 New applications and pass requests have been locked for your account by an Admin.
       </div>
 
-      <!-- Citizenship Application -->
-      <form id="citizenshipForm" class="space-y-4" onsubmit="submitCitizenship(event)">
-        <div>
-          <label class="block text-sm font-medium mb-1">Full Legal Name</label>
-          <input type="text" id="citFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+      <div id="applyFormWrap" class="space-y-6">
+        <div class="flex border-b border-slate-800 gap-4 pb-2">
+          <button id="tabBtnCit" onclick="switchFormTab('citizenship')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2">Citizenship Application</button>
+          <button id="tabBtnPass" onclick="switchFormTab('pass')" class="font-bold text-slate-400 pb-2">Temporary Visitor Pass</button>
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Email</label>
-          <input type="email" id="citEmail" readonly class="w-full bg-slate-800 border border-slate-700 rounded p-2.5 text-slate-400">
-        </div>
-        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Apply for Citizenship</button>
-      </form>
 
-      <!-- Temporary Pass Application -->
-      <form id="passForm" class="space-y-4 hidden" onsubmit="submitPass(event)">
-        <div>
-          <label class="block text-sm font-medium mb-1">Full Name</label>
-          <input type="text" id="passFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Pass Duration</label>
-          <select id="passDuration" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
-            <optgroup label="Minute Options (5-min increments)">
-              <option value="5">5 Minutes</option>
-              <option value="10">10 Minutes</option>
-              <option value="15">15 Minutes</option>
-              <option value="20">20 Minutes</option>
-              <option value="25">25 Minutes</option>
-              <option value="30">30 Minutes</option>
-            </optgroup>
-            <optgroup label="Extended Passes">
-              <option value="1440">1 Day Pass</option>
-              <option value="2880">2 Days Pass</option>
-              <option value="4320">3 Days Pass</option>
-              <option value="5760">4 Days Pass</option>
-              <option value="10080">1 Week Pass</option>
-            </optgroup>
-          </select>
-        </div>
-        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Request Temporary Pass</button>
-      </form>
-      <div id="formMsg" class="text-center font-semibold"></div>
+        <!-- Citizenship Form -->
+        <form id="citizenshipForm" class="space-y-4" onsubmit="submitCitizenship(event)">
+          <div>
+            <label class="block text-sm font-medium mb-1">Full Legal Name</label>
+            <input type="text" id="citFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Email Address</label>
+            <input type="email" id="citEmail" readonly class="w-full bg-slate-800 border border-slate-700 rounded p-2.5 text-slate-400">
+          </div>
+          <button type="submit" id="btnSubmitCit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Apply for Citizenship</button>
+        </form>
+
+        <!-- Temporary Pass Form -->
+        <form id="passForm" class="space-y-4 hidden" onsubmit="submitPass(event)">
+          <div>
+            <label class="block text-sm font-medium mb-1">Full Name</label>
+            <input type="text" id="passFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Pass Duration</label>
+            <select id="passDuration" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+              <optgroup label="Minute Options (5-min increments)">
+                <option value="5">5 Minutes</option>
+                <option value="10">10 Minutes</option>
+                <option value="15">15 Minutes</option>
+                <option value="20">20 Minutes</option>
+                <option value="25">25 Minutes</option>
+                <option value="30">30 Minutes</option>
+              </optgroup>
+              <optgroup label="Extended Passes">
+                <option value="1440">1 Day Pass</option>
+                <option value="2880">2 Days Pass</option>
+                <option value="4320">3 Days Pass</option>
+                <option value="5760">4 Days Pass</option>
+                <option value="10080">1 Week Pass</option>
+              </optgroup>
+            </select>
+          </div>
+          <button type="submit" id="btnSubmitPass" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Request Temporary Pass</button>
+        </form>
+        <div id="formMsg" class="text-center font-semibold text-sm"></div>
+      </div>
     </section>
 
     <!-- User Dashboard View -->
@@ -152,7 +158,7 @@
         <div class="space-y-2 text-sm">
           <p class="text-xs text-slate-400">Passport No: <span id="pNum" class="font-mono text-amber-300 text-base font-bold"></span></p>
           <p class="text-xs text-slate-400">Name: <span id="pName" class="text-white font-semibold"></span></p>
-          <p class="text-xs text-slate-400">Status: <span id="pStatus" class="text-emerald-400 font-bold"></span></p>
+          <p class="text-xs text-slate-400">Status: <span id="pStatus" class="font-bold"></span></p>
           <p class="text-xs text-slate-400">Approved Date: <span id="pDate" class="text-slate-200"></span></p>
         </div>
       </div>
@@ -246,7 +252,7 @@
       e.preventDefault();
       const msg = document.getElementById('authMsg');
       msg.className = "mt-4 text-center font-semibold text-sm text-slate-400";
-      msg.innerText = "Creating account...";
+      msg.innerText = "Registering...";
 
       const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
@@ -261,10 +267,9 @@
 
       const result = await response.json();
       if (result.success) {
-        currentUser = result.data.user;
-        localStorage.setItem('selimUser', JSON.stringify(currentUser));
-        msg.innerText = "";
-        fetchUserStatus();
+        msg.className = "mt-4 text-center font-semibold text-sm text-emerald-400";
+        msg.innerText = result.message;
+        setTimeout(() => switchAuthTab('login'), 2000);
       } else {
         msg.className = "mt-4 text-center font-semibold text-sm text-rose-400";
         msg.innerText = result.message;
@@ -288,18 +293,44 @@
 
       if (result.success) {
         showSection('dashboard');
-        const { citizenRecord, passes } = result.data;
+        const { userRecord, citizenRecord, passes } = result.data;
         const banner = document.getElementById('dashboardOverview');
         
-        let hasActiveCit = citizenRecord && citizenRecord.status === "Approved";
+        document.getElementById('passportCard').classList.add('hidden');
+        document.getElementById('passCard').classList.add('hidden');
+
+        // Check Account Approval Status First
+        if (userRecord.accountStatus !== "Approved") {
+          banner.innerHTML = `<span class="text-amber-400 font-bold">⏳ Account Approval Pending</span><br><span class="text-xs text-slate-400">An Admin must approve your user account before you can request citizenship or visitor passes.</span>`;
+          return;
+        }
+
+        let citStatus = citizenRecord ? citizenRecord.status : null;
         let activePass = passes.find(p => p.status === "Approved");
 
-        if (hasActiveCit) {
+        if (citStatus === "Approved") {
           banner.innerHTML = `<span class="text-emerald-400 font-bold">✓ Active Official Citizenship</span>`;
           document.getElementById('passportCard').classList.remove('hidden');
           document.getElementById('pNum').innerText = citizenRecord.passportNumber;
           document.getElementById('pName').innerText = citizenRecord.fullName;
           document.getElementById('pStatus').innerText = citizenRecord.status;
+          document.getElementById('pStatus').className = "font-bold text-emerald-400";
+          document.getElementById('pDate').innerText = citizenRecord.issuedDate;
+        } else if (citStatus === "Paused") {
+          banner.innerHTML = `<span class="text-amber-400 font-bold">⚠️ Citizenship Paused</span><br><span class="text-xs text-slate-400">Your citizenship is currently paused by the Sovereign Admin.</span>`;
+          document.getElementById('passportCard').classList.remove('hidden');
+          document.getElementById('pNum').innerText = citizenRecord.passportNumber;
+          document.getElementById('pName').innerText = citizenRecord.fullName;
+          document.getElementById('pStatus').innerText = "Paused";
+          document.getElementById('pStatus').className = "font-bold text-amber-400";
+          document.getElementById('pDate').innerText = citizenRecord.issuedDate;
+        } else if (citStatus === "Revoked") {
+          banner.innerHTML = `<span class="text-rose-400 font-bold">🚫 Citizenship Revoked / Removed</span><br><span class="text-xs text-slate-400">Your citizenship status has been revoked.</span>`;
+          document.getElementById('passportCard').classList.remove('hidden');
+          document.getElementById('pNum').innerText = citizenRecord.passportNumber;
+          document.getElementById('pName').innerText = citizenRecord.fullName;
+          document.getElementById('pStatus').innerText = "Revoked";
+          document.getElementById('pStatus').className = "font-bold text-rose-400";
           document.getElementById('pDate').innerText = citizenRecord.issuedDate;
         } else if (activePass) {
           banner.innerHTML = `<span class="text-amber-400 font-bold">🎟️ Active Temporary Visitor Pass</span>`;
@@ -310,16 +341,32 @@
           document.getElementById('passApprovedVal').innerText = activePass.approvedAt;
           document.getElementById('passExpiresVal').innerText = activePass.expiresAt;
         } else {
-          banner.innerHTML = `No active passport or pass found. <button onclick="showSection('apply')" class="text-amber-400 underline ml-2">Apply Now</button>`;
-          document.getElementById('citEmail').value = currentUser.email;
-          document.getElementById('citFullName').value = currentUser.fullName;
-          document.getElementById('passFullName').value = currentUser.fullName;
+          banner.innerHTML = `Account Approved! <button onclick="setupApplySection('${userRecord.requestsLocked}')" class="text-amber-400 underline ml-2 font-bold">Request Citizenship or Pass</button>`;
         }
+      }
+    }
+
+    function setupApplySection(requestsLocked) {
+      showSection('apply');
+      document.getElementById('citEmail').value = currentUser.email;
+      document.getElementById('citFullName').value = currentUser.fullName;
+      document.getElementById('passFullName').value = currentUser.fullName;
+
+      if (requestsLocked === "Yes") {
+        document.getElementById('applyLockNotice').classList.remove('hidden');
+        document.getElementById('applyFormWrap').classList.add('hidden');
+      } else {
+        document.getElementById('applyLockNotice').classList.add('hidden');
+        document.getElementById('applyFormWrap').classList.remove('hidden');
       }
     }
 
     async function submitCitizenship(e) {
       e.preventDefault();
+      const btn = document.getElementById('btnSubmitCit');
+      btn.disabled = true;
+      btn.innerText = "Submitting...";
+
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
@@ -331,12 +378,18 @@
         })
       });
       const result = await res.json();
+      btn.disabled = false;
+      btn.innerText = "Apply for Citizenship";
       document.getElementById('formMsg').innerText = result.message;
       if (result.success) setTimeout(fetchUserStatus, 1500);
     }
 
     async function submitPass(e) {
       e.preventDefault();
+      const btn = document.getElementById('btnSubmitPass');
+      btn.disabled = true;
+      btn.innerText = "Submitting...";
+
       const durationSelect = document.getElementById('passDuration');
       const passText = durationSelect.options[durationSelect.selectedIndex].text;
       
@@ -353,6 +406,8 @@
         })
       });
       const result = await res.json();
+      btn.disabled = false;
+      btn.innerText = "Request Temporary Pass";
       document.getElementById('formMsg').innerText = result.message;
       if (result.success) setTimeout(fetchUserStatus, 1500);
     }
