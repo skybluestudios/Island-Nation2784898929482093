@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selim Island Nation - Official Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Descope Web Component SDK -->
+  <script src="https://unpkg.com/@descope/web-component@latest/dist/index.js"></script>
+  <style>
+    .passport-card {
+      background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+      border: 2px solid #f59e0b;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Configuration Variables -->
+  <script>
+    const DESCOPE_PROJECT_ID = "P3IWd9Q6bmMoHLwBAnKqN57We0nk";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqwek057AkqjAk_TpxIfvELN1SpwOUj9wN4ifB92bwSelQw5uahsF1cmaqgVuFSmvu/exec";
+  </script>
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <span class="text-3xl">🏝️</span>
+        <h1 class="text-xl font-bold tracking-wider text-amber-400">SELIM ISLAND NATION</h1>
+      </div>
+      <div id="authHeaderState">
+        <button id="btnNavLogin" onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-2 rounded-lg font-semibold transition">
+          Sign In / Register
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Content -->
+  <main class="flex-grow max-w-4xl mx-auto px-4 py-10 w-full">
+
+    <!-- Landing View -->
+    <section id="secLanding" class="space-y-8 text-center">
+      <div class="py-12 space-y-4">
+        <h2 class="text-5xl font-extrabold text-amber-400">Welcome to Freedom & Sovereignty</h2>
+        <p class="text-lg text-slate-300 max-w-2xl mx-auto">
+          Selim Island Nation is a peaceful, forward-thinking micronation. Apply for digital citizenship today and receive your official digital passport upon verification.
+        </p>
+        <div class="pt-4 flex justify-center gap-4">
+          <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-6 py-3 rounded-lg text-lg font-bold">
+            Become a Citizen
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Descope Auth View -->
+    <section id="secAuth" class="hidden max-w-md mx-auto bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
+      <h3 class="text-xl font-bold text-center text-amber-400 mb-6">Citizen Access Portal</h3>
+      <div id="descopeContainer"></div>
+    </section>
+
+    <!-- Citizenship Application Form -->
+    <section id="secApply" class="hidden max-w-lg mx-auto bg-slate-800 p-8 rounded-xl border border-slate-700 shadow-xl">
+      <h3 class="text-2xl font-bold text-amber-400 mb-2">Citizenship Application</h3>
+      <p class="text-sm text-slate-400 mb-6">Complete your personal profile to request citizenship.</p>
+      
+      <form id="citizenshipForm" class="space-y-4" onsubmit="submitApplication(event)">
+        <div>
+          <label class="block text-sm font-medium mb-1">Full Name</label>
+          <input type="text" id="appFullName" required class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Email Address</label>
+          <input type="email" id="appEmail" required readonly class="w-full bg-slate-900/50 border border-slate-800 rounded p-2 text-slate-400 cursor-not-allowed">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Phone Number</label>
+          <input type="tel" id="appPhone" required placeholder="+1234567890" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <button type="submit" id="btnSubmitApp" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded transition">
+          Submit Application
+        </button>
+      </form>
+      <div id="appStatusMessage" class="mt-4 text-center font-semibold"></div>
+    </section>
+
+    <!-- User Dashboard / Digital Passport View -->
+    <section id="secDashboard" class="hidden space-y-6">
+      <div id="passportStatusBanner" class="p-4 rounded-lg bg-slate-800 border border-slate-700 text-center"></div>
+
+      <!-- Passport Card Component -->
+      <div id="passportCard" class="passport-card max-w-md mx-auto rounded-2xl p-6 shadow-2xl relative overflow-hidden hidden">
+        <div class="flex justify-between items-start border-b border-amber-500/30 pb-4 mb-4">
+          <div>
+            <p class="text-xs text-amber-400 uppercase tracking-widest font-semibold">Official Passport</p>
+            <h4 class="text-lg font-bold text-white">SELIM ISLAND NATION</h4>
+          </div>
+          <span class="text-3xl">🏝️</span>
+        </div>
+        
+        <div class="space-y-3 text-sm">
+          <div>
+            <p class="text-xs text-slate-400">Passport No.</p>
+            <p id="passNumber" class="font-mono font-bold text-amber-300 text-lg">---</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400">Full Name</p>
+            <p id="passName" class="font-semibold text-white uppercase">---</p>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <p class="text-xs text-slate-400">Status</p>
+              <p id="passStatus" class="font-bold text-emerald-400">---</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400">Issued Date</p>
+              <p id="passIssued" class="text-slate-200">---</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-3 border-t border-amber-500/30 flex justify-between items-center text-xs text-slate-400">
+          <span>Sovereign Digital Identity</span>
+          <span class="font-mono">SIN-VERIFIED</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    let currentUser = null;
+
+    // View Manager
+    function showSection(section) {
+      ['secLanding', 'secAuth', 'secApply', 'secDashboard'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      if (section === 'landing') document.getElementById('secLanding').classList.remove('hidden');
+      if (section === 'auth') {
+        document.getElementById('secAuth').classList.remove('hidden');
+        initDescope();
+      }
+      if (section === 'apply') document.getElementById('secApply').classList.remove('hidden');
+      if (section === 'dashboard') document.getElementById('secDashboard').classList.remove('hidden');
+    }
+
+    // Initialize Descope Authentication
+    function initDescope() {
+      const container = document.getElementById('descopeContainer');
+      container.innerHTML = `<descope-wc project-id="${DESCOPE_PROJECT_ID}" flow-id="sign-up-or-in"></descope-wc>`;
+      
+      const descopeWcEl = document.querySelector('descope-wc');
+      descopeWcEl.addEventListener('success', (e) => {
+        currentUser = {
+          userId: e.detail.user.userId,
+          email: e.detail.user.email,
+          name: e.detail.user.name || ""
+        };
+        handlePostLogin();
+      });
+    }
+
+    // Handle flow after successful authentication
+    async function handlePostLogin() {
+      document.getElementById('authHeaderState').innerHTML = `
+        <button onclick="logout()" class="border border-slate-700 hover:bg-slate-800 text-slate-300 px-4 py-2 rounded-lg text-sm transition">
+          Sign Out
+        </button>
+      `;
+
+      // Fetch citizenship record from Apps Script backend
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "getUserPassport", descopeUserId: currentUser.userId })
+      });
+      
+      const result = await response.json();
+
+      if (result.success) {
+        // Record found -> show Dashboard
+        showSection('dashboard');
+        renderPassport(result.data);
+      } else {
+        // No record -> show application form
+        showSection('apply');
+        document.getElementById('appEmail').value = currentUser.email;
+        if (currentUser.name) document.getElementById('appFullName').value = currentUser.name;
+      }
+    }
+
+    // Submit Application
+    async function submitApplication(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitApp');
+      const statusMsg = document.getElementById('appStatusMessage');
+      
+      btn.disabled = true;
+      btn.innerText = "Submitting...";
+
+      const payload = {
+        action: "requestCitizenship",
+        descopeUserId: currentUser.userId,
+        fullName: document.getElementById('appFullName').value,
+        email: currentUser.email,
+        phone: document.getElementById('appPhone').value
+      };
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      btn.disabled = false;
+      btn.innerText = "Submit Application";
+
+      if (result.success) {
+        statusMsg.className = "mt-4 text-center font-semibold text-emerald-400";
+        statusMsg.innerText = "Application submitted! Reviewing details...";
+        setTimeout(() => handlePostLogin(), 1500);
+      } else {
+        statusMsg.className = "mt-4 text-center font-semibold text-rose-400";
+        statusMsg.innerText = result.message;
+      }
+    }
+
+    // Render Digital Passport
+    function renderPassport(data) {
+      const banner = document.getElementById('passportStatusBanner');
+      const card = document.getElementById('passportCard');
+
+      if (data.status === 'Approved') {
+        banner.innerHTML = `<span class="text-emerald-400 font-bold">✓ Citizenship Approved</span> - Official Digital Passport Granted.`;
+        card.classList.remove('hidden');
+        document.getElementById('passNumber').innerText = data.passportNumber;
+        document.getElementById('passName').innerText = data.fullName;
+        document.getElementById('passStatus').innerText = data.status;
+        document.getElementById('passIssued').innerText = data.issuedDate;
+      } else if (data.status === 'Pending') {
+        banner.innerHTML = `<span class="text-amber-400 font-bold">⏳ Application Pending Review</span><br><span class="text-xs text-slate-400">Passport Number Reserved: ${data.passportNumber}</span>`;
+        card.classList.add('hidden');
+      } else {
+        banner.innerHTML = `<span class="text-rose-400 font-bold">✕ Citizenship Revoked / Rejected</span>`;
+        card.classList.add('hidden');
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      window.location.reload();
+    }
+  </script>
+</body>
+</html>
