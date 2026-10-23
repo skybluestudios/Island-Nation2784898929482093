@@ -9,7 +9,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeQ7_FFik0DbUcpJYQVxrER4KvQv5v-oNYuoXZ8QJueMzWGMs-UvVjXzpc0GnezUqA/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEKm6ZdDwe6rLLRLyfcQRk8xdx0NwGgrZYRlzfdxTscIUFC1VhfZ9_XgQX0VVeHJo/exec";
   </script>
 
   <header class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center">
@@ -112,20 +112,19 @@
       tbody.innerHTML = "";
 
       if (currentTab === "registered_users") {
-        headers.innerHTML = `<th class="p-4">User ID</th><th class="p-4">Full Name</th><th class="p-4">Email</th><th class="p-4">Phone</th><th class="p-4">Created Date</th>`;
+        headers.innerHTML = `<th class="p-4">User ID</th><th class="p-4">Full Name</th><th class="p-4">Email</th><th class="p-4">Created Date</th>`;
         rawData.users.forEach(u => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td class="p-4 font-mono font-bold text-amber-300">${u.userId}</td>
             <td class="p-4 font-medium text-white">${u.fullName}</td>
             <td class="p-4 text-xs">${u.email}</td>
-            <td class="p-4 text-xs text-slate-400">${u.phone || 'N/A'}</td>
             <td class="p-4 text-xs text-slate-400">${u.createdAt}</td>
           `;
           tbody.appendChild(tr);
         });
       } else if (currentTab.includes("citizen")) {
-        headers.innerHTML = `<th class="p-4">Passport No</th><th class="p-4">Applicant</th><th class="p-4">Email / Phone</th><th class="p-4">Status</th><th class="p-4">Approval Date</th><th class="p-4">Actions</th>`;
+        headers.innerHTML = `<th class="p-4">Passport No</th><th class="p-4">Applicant</th><th class="p-4">Email</th><th class="p-4">Status</th><th class="p-4">Approval Date</th><th class="p-4">Actions</th>`;
         
         let filtered = rawData.citizens.filter(c => {
           if (currentTab === "current_citizen") return c.status === "Approved";
@@ -138,7 +137,7 @@
           tr.innerHTML = `
             <td class="p-4 font-mono font-bold text-amber-300">${c.passportNumber}</td>
             <td class="p-4">${c.fullName}</td>
-            <td class="p-4 text-xs">${c.email}<br>${c.phone}</td>
+            <td class="p-4 text-xs">${c.email}</td>
             <td class="p-4 font-bold">${c.status}</td>
             <td class="p-4 text-xs">${c.issuedDate}</td>
             <td class="p-4 space-x-1">
