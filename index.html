@@ -3,22 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Selim Island Nation - Portal</title>
+  <title>Selim Island Nation - Official Portal</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://descopecdn.com/npm/@descope/web-component@3.59.2/dist/index.js"></script>
-  <script src="https://descopecdn.com/npm/@descope/web-js-sdk@1.50.3/dist/index.umd.js"></script>
   <style>
     .passport-card { background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border: 2px solid #f59e0b; }
-    descope-wc { width: 100%; min-height: 380px; display: block; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
   <script>
-    const DESCOPE_PROJECT_ID = "P3IWd9Q6bmMoHLwBAnKqN57We0nk";
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyje0ft0iBPhCIqFO8Nql83xL61g9FDfGhq2dv--Br_geEB5AK8kppJ9T_28agh3s4/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeQ7_FFik0DbUcpJYQVxrER4KvQv5v-oNYuoXZ8QJueMzWGMs-UvVjXzpc0GnezUqA/exec";
   </script>
 
+  <!-- Header -->
   <header class="border-b border-slate-800 bg-slate-900 sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
     <div class="flex items-center space-x-3 cursor-pointer" onclick="showSection('landing')">
       <span class="text-3xl">🏝️</span>
@@ -26,30 +23,70 @@
     </div>
     <div id="authHeaderState">
       <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-lg font-semibold transition">
-        Sign In / Apply
+        Sign In / Register
       </button>
     </div>
   </header>
 
   <main class="flex-grow max-w-4xl mx-auto px-4 py-10 w-full">
 
-    <!-- Landing Page -->
+    <!-- Landing View -->
     <section id="secLanding" class="text-center space-y-6 py-12">
       <h2 class="text-5xl font-extrabold text-amber-400">Sovereign Territory & Gateway</h2>
       <p class="text-slate-300 max-w-2xl mx-auto text-lg">
-        Apply for full citizenship or request short-term visitor passes to access Selim Island Nation digital sovereign services.
+        Apply for full citizenship or request short-term visitor passes to access Selim Island Nation sovereign digital services.
       </p>
       <button onclick="showSection('auth')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-8 py-3 rounded-lg text-lg font-bold">
         Enter Portal
       </button>
     </section>
 
-    <!-- Descope Auth View (Fixed Container Box) -->
-    <section id="secAuth" class="hidden max-w-md mx-auto bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-2xl">
-      <h3 class="text-xl font-bold text-center text-amber-400 mb-4">Citizen & Visitor Login</h3>
-      <div id="descopeContainer" class="w-full">
-        <!-- Injected Web Component -->
+    <!-- Native Registration / Login View -->
+    <section id="secAuth" class="hidden max-w-md mx-auto bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl">
+      <div class="flex border-b border-slate-800 gap-4 mb-6">
+        <button id="authTabLogin" onclick="switchAuthTab('login')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center">Sign In</button>
+        <button id="authTabRegister" onclick="switchAuthTab('register')" class="font-bold text-slate-400 pb-2 w-1/2 text-center">Create Account</button>
       </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
+        <div>
+          <label class="block text-sm font-medium mb-1">Email Address</label>
+          <input type="email" id="loginEmail" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Password</label>
+          <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <button type="submit" id="btnLoginSubmit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded transition">
+          Sign In
+        </button>
+      </form>
+
+      <!-- Registration Form -->
+      <form id="registerForm" class="space-y-4 hidden" onsubmit="handleRegister(event)">
+        <div>
+          <label class="block text-sm font-medium mb-1">Full Name</label>
+          <input type="text" id="regFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Email Address</label>
+          <input type="email" id="regEmail" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Phone Number</label>
+          <input type="tel" id="regPhone" required placeholder="+1234567890" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Password</label>
+          <input type="password" id="regPassword" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
+        </div>
+        <button type="submit" id="btnRegSubmit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded transition">
+          Register
+        </button>
+      </form>
+
+      <div id="authMsg" class="mt-4 text-center font-semibold text-sm"></div>
     </section>
 
     <!-- Application Selection / Request Form -->
@@ -71,7 +108,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Phone Number</label>
-          <input type="tel" id="citPhone" required placeholder="+1234567890" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+          <input type="tel" id="citPhone" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
         </div>
         <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Apply for Citizenship</button>
       </form>
@@ -84,7 +121,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Phone Number</label>
-          <input type="tel" id="passPhone" required placeholder="+1234567890" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
+          <input type="tel" id="passPhone" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Pass Duration</label>
@@ -115,7 +152,7 @@
     <section id="secDashboard" class="hidden space-y-6">
       <div id="dashboardOverview" class="p-4 bg-slate-900 border border-slate-800 rounded-lg text-center"></div>
 
-      <!-- Digital Citizenship Passport -->
+      <!-- Digital Citizenship Passport Card -->
       <div id="passportCard" class="passport-card max-w-md mx-auto rounded-2xl p-6 shadow-2xl hidden">
         <div class="flex justify-between border-b border-amber-500/30 pb-3 mb-4">
           <div>
@@ -153,13 +190,26 @@
   </main>
 
   <script>
-    let currentUser = null;
-    let descopeSdk = null;
+    let currentUser = JSON.parse(localStorage.getItem('selimUser') || 'null');
 
     function showSection(sec) {
       ['secLanding', 'secAuth', 'secApply', 'secDashboard'].forEach(id => document.getElementById(id).classList.add('hidden'));
       document.getElementById(sec === 'landing' ? 'secLanding' : sec === 'auth' ? 'secAuth' : sec === 'apply' ? 'secApply' : 'secDashboard').classList.remove('hidden');
-      if (sec === 'auth') renderDescopeWc();
+    }
+
+    function switchAuthTab(tab) {
+      document.getElementById('authMsg').innerText = '';
+      if (tab === 'login') {
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('registerForm').classList.add('hidden');
+        document.getElementById('authTabLogin').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center';
+        document.getElementById('authTabRegister').className = 'font-bold text-slate-400 pb-2 w-1/2 text-center';
+      } else {
+        document.getElementById('loginForm').classList.add('hidden');
+        document.getElementById('registerForm').classList.remove('hidden');
+        document.getElementById('authTabRegister').className = 'font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center';
+        document.getElementById('authTabLogin').className = 'font-bold text-slate-400 pb-2 w-1/2 text-center';
+      }
     }
 
     function switchFormTab(tab) {
@@ -176,24 +226,76 @@
       }
     }
 
-    function renderDescopeWc() {
-      const container = document.getElementById('descopeContainer');
-      container.innerHTML = `<descope-wc project-id="${DESCOPE_PROJECT_ID}" flow-id="sign-up-or-in" theme="dark"></descope-wc>`;
-      
-      const wc = container.querySelector('descope-wc');
-      wc.addEventListener('success', (e) => {
-        currentUser = { userId: e.detail.user.userId, email: e.detail.user.email, name: e.detail.user.name || "" };
-        fetchUserStatus();
+    async function handleLogin(e) {
+      e.preventDefault();
+      const msg = document.getElementById('authMsg');
+      msg.className = "mt-4 text-center font-semibold text-sm text-slate-400";
+      msg.innerText = "Authenticating...";
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: "userLogin",
+          email: document.getElementById('loginEmail').value,
+          password: document.getElementById('loginPassword').value
+        })
       });
+
+      const result = await response.json();
+      if (result.success) {
+        currentUser = result.data;
+        localStorage.setItem('selimUser', JSON.stringify(currentUser));
+        msg.innerText = "";
+        fetchUserStatus();
+      } else {
+        msg.className = "mt-4 text-center font-semibold text-sm text-rose-400";
+        msg.innerText = result.message;
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const msg = document.getElementById('authMsg');
+      msg.className = "mt-4 text-center font-semibold text-sm text-slate-400";
+      msg.innerText = "Creating account...";
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          action: "userRegister",
+          fullName: document.getElementById('regFullName').value,
+          email: document.getElementById('regEmail').value,
+          phone: document.getElementById('regPhone').value,
+          password: document.getElementById('regPassword').value
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        currentUser = result.data.user;
+        localStorage.setItem('selimUser', JSON.stringify(currentUser));
+        msg.innerText = "";
+        fetchUserStatus();
+      } else {
+        msg.className = "mt-4 text-center font-semibold text-sm text-rose-400";
+        msg.innerText = result.message;
+      }
     }
 
     async function fetchUserStatus() {
-      document.getElementById('authHeaderState').innerHTML = `<button onclick="logout()" class="border border-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm">Sign Out</button>`;
+      document.getElementById('authHeaderState').innerHTML = `
+        <div class="flex items-center space-x-3">
+          <span class="text-sm font-semibold text-amber-400">${currentUser.fullName}</span>
+          <button onclick="logout()" class="border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-sm hover:bg-slate-800">Sign Out</button>
+        </div>
+      `;
 
       const res = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: "getUserStatus", descopeUserId: currentUser.userId })
+        body: JSON.stringify({ action: "getUserStatus", userId: currentUser.userId })
       });
       const result = await res.json();
 
@@ -223,8 +325,10 @@
         } else {
           banner.innerHTML = `No active passport or pass found. <button onclick="showSection('apply')" class="text-amber-400 underline ml-2">Apply Now</button>`;
           document.getElementById('citEmail').value = currentUser.email;
-          document.getElementById('citFullName').value = currentUser.name;
-          document.getElementById('passFullName').value = currentUser.name;
+          document.getElementById('citFullName').value = currentUser.fullName;
+          document.getElementById('citPhone').value = currentUser.phone || "";
+          document.getElementById('passFullName').value = currentUser.fullName;
+          document.getElementById('passPhone').value = currentUser.phone || "";
         }
       }
     }
@@ -236,7 +340,7 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: "requestCitizenship",
-          descopeUserId: currentUser.userId,
+          userId: currentUser.userId,
           fullName: document.getElementById('citFullName').value,
           email: currentUser.email,
           phone: document.getElementById('citPhone').value
@@ -257,7 +361,7 @@
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({
           action: "requestPass",
-          descopeUserId: currentUser.userId,
+          userId: currentUser.userId,
           fullName: document.getElementById('passFullName').value,
           email: currentUser.email,
           phone: document.getElementById('passPhone').value,
@@ -270,10 +374,16 @@
       if (result.success) setTimeout(fetchUserStatus, 1500);
     }
 
-    function logout() { window.location.reload(); }
+    function logout() {
+      localStorage.removeItem('selimUser');
+      currentUser = null;
+      window.location.reload();
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
-      if (typeof Descope !== 'undefined') descopeSdk = Descope({ projectId: DESCOPE_PROJECT_ID });
+      if (currentUser) {
+        fetchUserStatus();
+      }
     });
   </script>
 </body>
