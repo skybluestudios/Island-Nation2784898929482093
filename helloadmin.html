@@ -9,7 +9,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEKm6ZdDwe6rLLRLyfcQRk8xdx0NwGgrZYRlzfdxTscIUFC1VhfZ9_XgQX0VVeHJo/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBG5L210aazB1GwIGJylYP9qB1PkC90g8PULavdk2W0p9Os-4moolYamcKBKVYQ9QF/exec";
   </script>
 
   <header class="border-b border-slate-800 bg-slate-900 px-6 py-4 flex justify-between items-center">
@@ -37,7 +37,8 @@
       
       <!-- Category Tabs -->
       <div class="flex flex-wrap border-b border-slate-800 gap-2 pb-2 text-xs font-semibold">
-        <button onclick="switchTab('registered_users')" id="tab_registered_users" class="px-3 py-2 rounded bg-amber-500 text-slate-950">Registered Users</button>
+        <button onclick="switchTab('pending_users')" id="tab_pending_users" class="px-3 py-2 rounded bg-amber-500 text-slate-950">Pending Account Approvals</button>
+        <button onclick="switchTab('registered_users')" id="tab_registered_users" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Approved User Accounts</button>
         <button onclick="switchTab('current_citizen')" id="tab_current_citizen" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Current Citizens</button>
         <button onclick="switchTab('current_pass')" id="tab_current_pass" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Current Pass Holders</button>
         <button onclick="switchTab('pending_citizen')" id="tab_pending_citizen" class="px-3 py-2 rounded bg-slate-800 text-slate-300">Pending Citizens</button>
@@ -62,7 +63,7 @@
   <script>
     let adminPwd = "";
     let rawData = { users: [], citizens: [], passes: [] };
-    let currentTab = "registered_users";
+    let currentTab = "pending_users";
 
     async function authenticateAdmin(e) {
       e.preventDefault();
@@ -100,7 +101,7 @@
 
     function switchTab(tabKey) {
       currentTab = tabKey;
-      ['registered_users','current_citizen','current_pass','pending_citizen','pending_pass','expired_pass','paused_citizen'].forEach(k => {
+      ['pending_users','registered_users','current_citizen','current_pass','pending_citizen','pending_pass','expired_pass','paused_citizen'].forEach(k => {
         document.getElementById('tab_' + k).className = k === tabKey ? "px-3 py-2 rounded bg-amber-500 text-slate-950 font-bold" : "px-3 py-2 rounded bg-slate-800 text-slate-300 font-semibold";
       });
       renderCurrentTab();
@@ -111,15 +112,23 @@
       const tbody = document.getElementById('adminTableBody');
       tbody.innerHTML = "";
 
-      if (currentTab === "registered_users") {
-        headers.innerHTML = `<th class="p-4">User ID</th><th class="p-4">Full Name</th><th class="p-4">Email</th><th class="p-4">Created Date</th>`;
-        rawData.users.forEach(u => {
+      if (currentTab === "pending_users" || currentTab === "registered_users") {
+        headers.innerHTML = `<th class="p-4">User ID</th><th class="p-4">Full Name</th><th class="p-4">Email</th><th class="p-4">Account Status</th><th class="p-4">Request Mode</th><th class="p-4">Actions</th>`;
+        
+        let filtered = rawData.users.filter(u => currentTab === "pending_users" ? u.accountStatus === "Pending" : u.accountStatus === "Approved");
+
+        filtered.forEach(u => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td class="p-4 font-mono font-bold text-amber-300">${u.userId}</td>
             <td class="p-4 font-medium text-white">${u.fullName}</td>
             <td class="p-4 text-xs">${u.email}</td>
-            <td class="p-4 text-xs text-slate-400">${u.createdAt}</td>
+            <td class="p-4 font-bold ${u.accountStatus === 'Approved' ? 'text-emerald-400' : 'text-amber-400'}">${u.accountStatus}</td>
+            <td class="p-4 text-xs font-semibold ${u.requestsLocked === 'Yes' ? 'text-rose-400' : 'text-slate-300'}">${u.requestsLocked === 'Yes' ? '🔒 Locked' : '🔓 Allowed'}</td>
+            <td class="p-4 space-x-1">
+              ${u.accountStatus !== 'Approved' ? `<button onclick="updateUserAccount(this, '${u.userId}', 'Approved', undefined)" class="bg-emerald-600 text-xs px-2 py-1 rounded">Approve Account</button>` : ''}
+              ${u.requestsLocked !== 'Yes' ? `<button onclick="updateUserAccount(this, '${u.userId}', undefined, 'Yes')" class="bg-rose-600 text-xs px-2 py-1 rounded">Lock Requests</button>` : `<button onclick="updateUserAccount(this, '${u.userId}', undefined, 'No')" class="bg-slate-700 text-xs px-2 py-1 rounded">Unlock Requests</button>`}
+            </td>
           `;
           tbody.appendChild(tr);
         });
@@ -138,12 +147,12 @@
             <td class="p-4 font-mono font-bold text-amber-300">${c.passportNumber}</td>
             <td class="p-4">${c.fullName}</td>
             <td class="p-4 text-xs">${c.email}</td>
-            <td class="p-4 font-bold">${c.status}</td>
+            <td class="p-4 font-bold ${c.status === 'Approved' ? 'text-emerald-400' : c.status === 'Paused' ? 'text-amber-400' : 'text-rose-400'}">${c.status}</td>
             <td class="p-4 text-xs">${c.issuedDate}</td>
             <td class="p-4 space-x-1">
-              ${c.status !== 'Approved' ? `<button onclick="updateCit('${c.passportNumber}','Approved')" class="bg-emerald-600 text-xs px-2 py-1 rounded">Approve</button>` : ''}
-              ${c.status !== 'Paused' ? `<button onclick="updateCit('${c.passportNumber}','Paused')" class="bg-amber-600 text-xs px-2 py-1 rounded">Pause</button>` : ''}
-              ${c.status !== 'Revoked' ? `<button onclick="updateCit('${c.passportNumber}','Revoked')" class="bg-rose-600 text-xs px-2 py-1 rounded">Revoke</button>` : ''}
+              ${c.status !== 'Approved' ? `<button onclick="updateCit(this, '${c.passportNumber}','Approved')" class="bg-emerald-600 text-xs px-2 py-1 rounded">Approve</button>` : ''}
+              ${c.status !== 'Paused' ? `<button onclick="updateCit(this, '${c.passportNumber}','Paused')" class="bg-amber-600 text-xs px-2 py-1 rounded">Pause</button>` : ''}
+              ${c.status !== 'Revoked' ? `<button onclick="updateCit(this, '${c.passportNumber}','Revoked')" class="bg-rose-600 text-xs px-2 py-1 rounded">Revoke</button>` : ''}
             </td>
           `;
           tbody.appendChild(tr);
@@ -167,8 +176,8 @@
             <td class="p-4 text-xs">${p.approvedAt}</td>
             <td class="p-4 text-xs text-amber-400 font-bold">${p.expiresAt}</td>
             <td class="p-4 space-x-1">
-              ${p.status !== 'Approved' ? `<button onclick="updatePass('${p.passId}','Approved')" class="bg-emerald-600 text-xs px-2 py-1 rounded">Approve</button>` : ''}
-              ${p.status !== 'Revoked' ? `<button onclick="updatePass('${p.passId}','Revoked')" class="bg-rose-600 text-xs px-2 py-1 rounded">Revoke</button>` : ''}
+              ${p.status !== 'Approved' ? `<button onclick="updatePass(this, '${p.passId}','Approved')" class="bg-emerald-600 text-xs px-2 py-1 rounded">Approve</button>` : ''}
+              ${p.status !== 'Revoked' ? `<button onclick="updatePass(this, '${p.passId}','Revoked')" class="bg-rose-600 text-xs px-2 py-1 rounded">Revoke</button>` : ''}
             </td>
           `;
           tbody.appendChild(tr);
@@ -176,22 +185,37 @@
       }
     }
 
-    async function updateCit(passportNumber, newStatus) {
+    async function updateUserAccount(btn, userId, newAccountStatus, requestsLocked) {
+      btn.disabled = true;
+      btn.innerText = "Updating...";
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: "adminUpdateUserAccount", adminPassword: adminPwd, userId, newAccountStatus, requestsLocked })
+      });
+      await loadAllData();
+    }
+
+    async function updateCit(btn, passportNumber, newStatus) {
+      btn.disabled = true;
+      btn.innerText = "Updating...";
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: "adminUpdateCitizenStatus", adminPassword: adminPwd, passportNumber, newStatus })
       });
-      loadAllData();
+      await loadAllData();
     }
 
-    async function updatePass(passId, newStatus) {
+    async function updatePass(btn, passId, newStatus) {
+      btn.disabled = true;
+      btn.innerText = "Updating...";
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: "adminUpdatePassStatus", adminPassword: adminPwd, passId, newStatus })
       });
-      loadAllData();
+      await loadAllData();
     }
   </script>
 </body>
