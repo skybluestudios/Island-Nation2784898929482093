@@ -12,7 +12,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
   <script>
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxeQ7_FFik0DbUcpJYQVxrER4KvQv5v-oNYuoXZ8QJueMzWGMs-UvVjXzpc0GnezUqA/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEKm6ZdDwe6rLLRLyfcQRk8xdx0NwGgrZYRlzfdxTscIUFC1VhfZ9_XgQX0VVeHJo/exec";
   </script>
 
   <!-- Header -->
@@ -41,7 +41,7 @@
       </button>
     </section>
 
-    <!-- Native Registration / Login View -->
+    <!-- Registration / Login View -->
     <section id="secAuth" class="hidden max-w-md mx-auto bg-slate-900 border border-slate-800 p-8 rounded-xl shadow-2xl">
       <div class="flex border-b border-slate-800 gap-4 mb-6">
         <button id="authTabLogin" onclick="switchAuthTab('login')" class="font-bold text-amber-400 border-b-2 border-amber-400 pb-2 w-1/2 text-center">Sign In</button>
@@ -74,10 +74,6 @@
           <input type="email" id="regEmail" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1">Phone Number</label>
-          <input type="tel" id="regPhone" required placeholder="+1234567890" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
-        </div>
-        <div>
           <label class="block text-sm font-medium mb-1">Password</label>
           <input type="password" id="regPassword" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white focus:border-amber-400 focus:outline-none">
         </div>
@@ -106,10 +102,6 @@
           <label class="block text-sm font-medium mb-1">Email</label>
           <input type="email" id="citEmail" readonly class="w-full bg-slate-800 border border-slate-700 rounded p-2.5 text-slate-400">
         </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Phone Number</label>
-          <input type="tel" id="citPhone" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
-        </div>
         <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded">Apply for Citizenship</button>
       </form>
 
@@ -118,10 +110,6 @@
         <div>
           <label class="block text-sm font-medium mb-1">Full Name</label>
           <input type="text" id="passFullName" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1">Phone Number</label>
-          <input type="tel" id="passPhone" required class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-white">
         </div>
         <div>
           <label class="block text-sm font-medium mb-1">Pass Duration</label>
@@ -267,7 +255,6 @@
           action: "userRegister",
           fullName: document.getElementById('regFullName').value,
           email: document.getElementById('regEmail').value,
-          phone: document.getElementById('regPhone').value,
           password: document.getElementById('regPassword').value
         })
       });
@@ -326,9 +313,7 @@
           banner.innerHTML = `No active passport or pass found. <button onclick="showSection('apply')" class="text-amber-400 underline ml-2">Apply Now</button>`;
           document.getElementById('citEmail').value = currentUser.email;
           document.getElementById('citFullName').value = currentUser.fullName;
-          document.getElementById('citPhone').value = currentUser.phone || "";
           document.getElementById('passFullName').value = currentUser.fullName;
-          document.getElementById('passPhone').value = currentUser.phone || "";
         }
       }
     }
@@ -342,8 +327,7 @@
           action: "requestCitizenship",
           userId: currentUser.userId,
           fullName: document.getElementById('citFullName').value,
-          email: currentUser.email,
-          phone: document.getElementById('citPhone').value
+          email: currentUser.email
         })
       });
       const result = await res.json();
@@ -364,7 +348,6 @@
           userId: currentUser.userId,
           fullName: document.getElementById('passFullName').value,
           email: currentUser.email,
-          phone: document.getElementById('passPhone').value,
           passType: passText,
           durationMinutes: durationSelect.value
         })
